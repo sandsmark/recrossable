@@ -1,0 +1,9 @@
+cwc.o: cwc.cc timer.hh symbol.hh main.hh dict.hh letterdict.hh \
+ wordlist.hh grid.hh cwc.hh
+dict.o: dict.cc symbol.hh main.hh dict.hh
+grid.o: grid.cc grid.hh symbol.hh main.hh dict.hh
+letterdict.o: letterdict.cc letterdict.hh symbol.hh main.hh dict.hh \
+ wordlist.hh
+symbol.o: symbol.cc symbol.hh main.hh
+timer.o: timer.cc timer.hh
+wordlist.o: wordlist.cc wordlist.hh symbol.hh main.hh
