@@ -10,7 +10,7 @@ Crossword::Crossword(QObject *parent) : QObject(parent),
     m_rows(4),
     m_columns(4)
 {
-    parseWordlist("/home/sandsmark/src/remarcrossword/nyt.tsv");
+    parseWordlist(":/nyt.tsv");
 
 }
 
