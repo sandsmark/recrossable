@@ -24,8 +24,10 @@ SOURCES += \
     cwc/symbol.cc \
     cwc/timer.cc \
     cwc/wordlist.cc \
-    drawablecell.cpp
+    drawablecell.cpp \
+    characterrecognizer.cpp
 
+LIBS += -ldlib
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -49,4 +51,5 @@ HEADERS += \
     cwc/symbol.hh \
     cwc/timer.hh \
     cwc/wordlist.hh \
-    drawablecell.h
+    drawablecell.h \
+    characterrecognizer.h

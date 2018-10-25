@@ -1,6 +1,7 @@
 #include "drawablecell.h"
 #include <QImage>
 #include <QPainter>
+#include "characterrecognizer.h"
 
 DrawableCell::DrawableCell()
 {
@@ -46,7 +47,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 {
     Q_UNUSED(event);
     update();
-    const QImage scaled = m_drawn.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QImage scaled = m_drawn.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_Grayscale8);
 
     int black = 0;
     for (int y=0; y<scaled.height(); y++) {
@@ -63,4 +64,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     } else {
         m_drawn = scaled.scaled(boundingRect().size().toSize());
     }
+
+    scaled.invertPixels();
+    qDebug() << CharacterRecognizer::instance()->recognize(scaled);
 }
