@@ -31,21 +31,30 @@
  * are sorted.
  */
 
-class WordList {
-protected:
-    std::vector<Symbol*> widx;
-    bool wordok(const std::string &st);
-    int nwords;
+class WordList
+{
+    static const int chunksize = 8192;
+
 public:
     SymbolSet allalpha;
     WordList();
     void load(const std::string &fn);
+    void addWord(const std::string &word);
     int numwords() {
         return widx.size();
     }
+
     Symbol *operator[](int i) {
         return widx[i];
     }
+
+protected:
+    std::vector<Symbol*> widx;
+    bool wordok(const std::string &st);
+    int nwords;
+
+    Symbol *chunk = nullptr;
+    int chunkused = 0;
 };
 
 #endif // CWC_WORDLIST_HH

@@ -101,10 +101,10 @@ std::string Cell::touppercasestring() {
 //////////////////////////////////////////////////////////////////////
 // class coord
 
-coord::coord(int _x, int _y) : x(_x), y(_y) {
+Coord::Coord(int _x, int _y) : x(_x), y(_y) {
 }
 
-std::ostream &operator << (std::ostream &os, coord &c) {
+std::ostream &operator << (std::ostream &os, Coord &c) {
     return os << c.x << ',' << c.y;
 }
 
@@ -122,8 +122,9 @@ void Grid::init_grid(int w, int h) {
     this->w = w;
     this->h = h;
     cls.clear();
-    for (int i = 0; i < w*h; i++)
+    for (int i = 0; i < w*h; i++) {
         cls.push_back(Cell());
+    }
     cls_size = cls.size();
 }
 
@@ -522,7 +523,7 @@ int Grid::numopen() {
 }
 
 void ClueNumbering::dump(std::ostream &os) {
-    std::unordered_set<int>::iterator a;
+    std::set<int>::iterator a;
     for(a=clues.begin();
         a!=clues.end();
         ++a) {

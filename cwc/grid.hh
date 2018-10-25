@@ -26,6 +26,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <sstream>
 #include "symbol.hh"
 #include "dict.hh"
@@ -98,19 +99,19 @@ public:
     std::string touppercasestring();
 };
 
-struct coord {
+struct Coord {
     int x, y;
 public:
-    coord(int _x = 0, int _y = 0);
-    bool operator==(const coord &c) const { return ((x==c.x)&&(y==c.y)); }
+    Coord(int _x = 0, int _y = 0);
+    bool operator==(const Coord &c) const { return ((x==c.x)&&(y==c.y)); }
 };
 
-std::ostream & operator<<(std::ostream &os, coord &c);
+std::ostream & operator<<(std::ostream &os, Coord &c);
 
 class ClueNumbering {
 public:
     std::unordered_set<int> cells;
-    std::unordered_set<int> clues;
+    std::set<int> clues;
     std::unordered_map<int,std::string> cluetoanswer;
     std::unordered_map<int,std::string> celltoanswer;
     void dump(std::ostream &os);
@@ -133,7 +134,7 @@ protected:
 public:
     bool verbose;
     int w, h;
-    Grid(int width = 10, int height = 10);
+    Grid(int width = 4, int height = 4);
 
     inline Cell &cellno(int n) {
         if ((n < 0)||(n >= cls_size))
@@ -151,12 +152,12 @@ public:
         return cls[y*w + x];
     }
 
-    Cell &cellat(coord &c) {
+    Cell &cellat(Coord &c) {
         return cellat(c.x, c.y);
     }
 
     Cell &operator()(int x, int y) { return cellat(x, y); }
-    Cell &operator()(coord &c) { return cellat(c); }
+    Cell &operator()(Coord &c) { return cellat(c); }
     Cell &operator()(int p) { return cellno(p); }
 
     void load_template(const std::string &filename);

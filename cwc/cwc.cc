@@ -51,12 +51,12 @@ Walker::Walker(Grid &thegrid) : current(0), g(thegrid) {
     inited = false;
 }
 
-Cell &Walker::currentcell() {
+Cell &Walker::currentCell() {
     if (!inited) throw error("walker not inited");
     return g.cellno(current);
 }
 
-void Walker::backto(int c) {
+void Walker::backTo(int c) {
     while (current != c)
         backward();
 }
@@ -69,14 +69,14 @@ bool Walker::current_oneof(int no[], int n) {
     return false;
 }
 
-void Walker::backto_oneof(int no[], int n) {
+void Walker::backToOneOf(int no[], int n) {
     while (!current_oneof(no, n))
         backward();
 }
 
-void Walker::backto_oneof(Backtracker &bt) {
+void Walker::backToOneOf(Backtracker &bt) {
     backward(false); // dont save current
-    while (!bt.stophere(current))
+    while (!bt.stopHere(current))
         backward(true); // save all we skip
 }
 
@@ -103,11 +103,13 @@ bool Walker::moresteps() {
 
 void Walker::findnext() {
     int ncells = g.numcells();
-    for (int i = 0; i < ncells; i++)
+    for (int i = 0; i < ncells; i++) {
+        std::cout << i << " " << g.cellno(i).getsymbol().symbvalue() << std::endl;
         if (g.cellno(i).isempty()) {
             current = i;
             return;
         }
+    }
     throw error("No empty cells");
 }
 
@@ -184,7 +186,7 @@ void NaiveBacktracker::backtrack(Walker &w) {
 
 void SmartBacktracker::backtrack(Walker &w) {
     // search up
-    int cpos = w.stepno();
+    int cpos = w.stepCount();
 
     // initially, forget all bt points that are dependend on cells behind
     // current point.
@@ -199,7 +201,7 @@ void SmartBacktracker::backtrack(Walker &w) {
         }
     }
 
-    int cno = w.getcurrent();
+    int cno = w.getCurrent();
 
     Cell &c = g.cellno(cno);
     int nwords = c.numwords();
@@ -222,10 +224,10 @@ void SmartBacktracker::backtrack(Walker &w) {
         std::cout << std::endl;
     }
 
-    w.backto_oneof(*this);
+    w.backToOneOf(*this);
 }
 
-bool SmartBacktracker::stophere(int p) {
+bool SmartBacktracker::stopHere(int p) {
     for (std::list<cpair>::iterator i = bt_points.begin();
          i != bt_points.end();
          i++) {
@@ -259,12 +261,12 @@ Compiler::Compiler(Grid &thegrid, Walker &thewalker,
 Timer dtimer;
 
 bool Compiler::compile_rest(double rejected) {
-    int c = w.getcurrent();
+    int c = w.getCurrent();
     if (verbose)
         std::cout << "attempting to find solution for " << c << std::endl;
     SymbolSet ss = g(c).findpossible(d);
     int npossible = numones(ss);
-    rejected += (numalpha-double(npossible)) * pow(numalpha, numcells - w.stepno());
+    rejected += (numalpha-double(npossible)) * pow(numalpha, numcells - w.stepCount());
     if (verbose)
         dumpset(ss);
 
@@ -287,18 +289,18 @@ bool Compiler::compile_rest(double rejected) {
         if (w.moresteps()) {
             w.forward();
             if (compile_rest(rejected) == success) return success;
-            if (w.getcurrent() != c) return failure; // catch if ==
+            if (w.getCurrent() != c) return failure; // catch if ==
             // cout << "continue at " << c << endl;
-            rejected += pow(numalpha, numcells - w.stepno());
+            rejected += pow(numalpha, numcells - w.stepCount());
         } else {
             this->rejected = rejected;
             return success;
         }
         g(c).setsymbol(Symbol::empty);
     }
-    if (w.stepno() > 1) {
+    if (w.stepCount() > 1) {
         bt.backtrack(w);
-        int cur = w.getcurrent();
+        int cur = w.getCurrent();
         if (verbose)
             std::cout << "return to " << cur << " from " << c << std::endl;
     }
@@ -334,30 +336,6 @@ void dumpsymbollist(Symbol *s, int n) {
             std::cout << s[i];
     }
     std::cout << std::endl;
-}
-
-void trivial_random_init() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    srand(tv.tv_usec);
-}
-
-void random_init(setup_s &s) {
-    unsigned int q;
-    if (!s.setseed) {
-        int fd = open("/dev/random", O_RDONLY);
-        if (fd == -1) {
-            trivial_random_init();
-            return;
-        }
-        if (read(fd, &q, 4) == -1)
-            perror("read");
-        close(fd);
-    } else {
-        q = s.seed;
-    }
-    std::cout << "random seed: " << q << std::endl;
-    srand(q);
 }
 
 setup_s setup = {

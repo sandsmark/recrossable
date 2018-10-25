@@ -51,7 +51,7 @@ class BtreeDict : public Dict {
     SymbolLink primary[MAXWORDLEN];
 public:
     BtreeDict();
-    void addword(Symbol *, int);
+    void addWord(Symbol *, int);
     void load(const std::string &fn);
     int size();
     SymbolSet findpossible(Symbol *s, int len, int pos);

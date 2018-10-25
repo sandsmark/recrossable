@@ -50,6 +50,15 @@
 LetterDict::LetterDict() : p(0), all(0) {
 }
 
+LetterDict::~LetterDict()
+{
+    for (size_t i=0; i<MAXWORDLEN; i++) {
+        delete p[i];
+    }
+    delete p;
+    delete all;
+}
+
 template<class T>
 T **newptrarray(int n) {
     T **p = new T*[n];
@@ -161,7 +170,8 @@ SymbolSet LetterDict::findpossible(Symbol *s, int len, int pos) {
     return ss;
 }
 
-void LetterDict::load(const std::string &fn) {
+void LetterDict::load(const std::string &fn)
+{
     std::cout << "Loading wordlist and building dictionary... " << std::flush;
 
     wl = new WordList();

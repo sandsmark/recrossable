@@ -23,6 +23,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <stdint.h>
+
 #include <string.h>
 
 #include "symbol.hh"
@@ -136,7 +138,7 @@ Dict::~Dict() {
 BtreeDict::BtreeDict() : primary() {
 }
 
-void BtreeDict::addword(Symbol *str, int n) {
+void BtreeDict::addWord(Symbol *str, int n) {
     primary[n].addword(str, n);
 }
 
@@ -170,9 +172,9 @@ void BtreeDict::load(const std::string &fn) {
             Symbol *symbs = new Symbol[wlen];
             for (int i=0;i<wlen;i++) {
                 symbs[i] = sz[i];
-                chset[(unsigned char)sz[i]] = true;
+                chset[uint8_t(sz[i])] = true;
             }
-            addword(symbs, wlen);
+            addWord(symbs, wlen);
             wordsused++;
             delete[] symbs;
         } else {
@@ -184,7 +186,7 @@ void BtreeDict::load(const std::string &fn) {
         if (chset[i]) {
             Symbol s[1];
             s[0] = i;
-            addword(s, 1);
+            addWord(s, 1);
         }
     }
     std::cout << "ok" << std::endl;

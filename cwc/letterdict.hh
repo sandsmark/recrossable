@@ -32,10 +32,11 @@ class LetterDict : public Dict {
     typedef std::vector<int> intvec;
     intvec ****p;
     SymbolSet **all;
-    WordList *wl;
     static intvec emptyvec;
 public:
+    WordList *wl = nullptr;
     LetterDict();
+    ~LetterDict();
     void addword(Symbol *i, int wordi);
     intvec *getintvec(int len, int pos, Symbol s);
     SymbolSet findpossible(Symbol *, int len, int pos);

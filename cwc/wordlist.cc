@@ -26,7 +26,6 @@ WordList::WordList() {
     allalpha = 0;
 }
 
-#define chunksize 8192
 
 bool WordList::wordok(const std::string &fn) {
     int n = fn.length();
@@ -42,31 +41,41 @@ void WordList::load(const std::string &fn) {
 
     widx.clear();
 
-    Symbol *chunk = new Symbol[chunksize];
-    int chunkused = 0;
-
-    std::string ln;
+    std::string line;
     while (!f.eof()) {
-        getline(f, ln);
-        int wlen = ln.length();
-        if (wlen == 0)
-            continue;
-        if (!wordok(ln))
-            continue;
-
-        if (chunksize - chunkused < wlen+1) {
-            chunk = new Symbol[chunksize];
-            chunkused = 0;
-        }
-
-        Symbol *addr = chunk + chunkused;
-        for (int i=0; i<wlen; i++) {
-            Symbol s = Symbol(tolower(ln[i]));
-            chunk[chunkused++] = s;
-            allalpha |= s.getsymbolset();
-        }
-        chunk[chunkused++] = Symbol::outside;
-
-        widx.push_back(addr);
+        getline(f, line);
+        addWord(line);
     }
+}
+
+void WordList::addWord(const std::string &word)
+{
+    if (!chunk) {
+        chunk = new Symbol[chunksize];
+    }
+
+    int wordLength = word.length();
+
+    if (wordLength == 0) {
+        return;
+    }
+
+    if (!wordok(word)) {
+        return;
+    }
+
+    if (chunksize - chunkused < wordLength+1) {
+        chunk = new Symbol[chunksize];
+        chunkused = 0;
+    }
+
+    Symbol *addr = chunk + chunkused;
+    for (int i=0; i<wordLength; i++) {
+        Symbol s = Symbol(tolower(word[i]));
+        chunk[chunkused++] = s;
+        allalpha |= s.getsymbolset();
+    }
+    chunk[chunkused++] = Symbol::outside;
+
+    widx.push_back(addr);
 }

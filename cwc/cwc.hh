@@ -45,14 +45,14 @@ protected:
 public:
     Walker(Grid &thegrid);
     virtual ~Walker() {}
-    void backto(int dest);
-    void backto_oneof(int dest[], int n);
-    void backto_oneof(Backtracker &bt);
-    int getcurrent() { return current; }
-    Cell &currentcell();
+    void backTo(int dest);
+    void backToOneOf(int dest[], int n);
+    void backToOneOf(Backtracker &bt);
+    int getCurrent() { return current; }
+    Cell &currentCell();
     void forward();
     void backward(bool savepreferred = false);
-    int stepno() { return cellno.size() + 1; }
+    int stepCount() { return cellno.size() + 1; }
 
 protected:
     /**
@@ -105,14 +105,14 @@ public:
     // upon a dead end, this method will track back to
     // a cell where a new solution should be tried.
     virtual void backtrack(Walker &w) =  0;
-    virtual bool stophere(int p) = 0;
+    virtual bool stopHere(int p) = 0;
 };
 
 class NaiveBacktracker : public Backtracker {
 public:
     NaiveBacktracker(Grid &thegrid) : Backtracker(thegrid) {}
     void backtrack(Walker &w) override;
-    bool stophere(int p) override { return true; }
+    bool stopHere(int /*p*/) override { return true; }
 };
 
 class SmartBacktracker : public Backtracker {
@@ -123,7 +123,7 @@ class SmartBacktracker : public Backtracker {
 public:
     SmartBacktracker(Grid &thegrid) : Backtracker(thegrid) {}
     void backtrack(Walker &w) override;
-    bool stophere(int p) override;
+    bool stopHere(int p) override;
 };
 
 class Compiler {
@@ -141,7 +141,7 @@ public:
     void compile();
 
     bool verbose, findall, showsteps;
-    double getrejected() { return rejected; }
+    double getRejected() { return rejected; }
 };
 
 void dodictbench();

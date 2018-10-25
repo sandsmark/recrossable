@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QVector>
+#include <QHash>
+
+#include "cwc/grid.hh"
 
 class Crossword : public QObject
 {
@@ -21,22 +24,25 @@ signals:
     void rowsChanged();
 
 public slots:
-    QString hintAt(const int row, const int column);
+    QString hintAt(const int index);
+    QString correctAt(const int index);
+
+    QStringList hintsAcross();
+    QStringList hintsDown();
+
+    QString hintTextAt(int index);
 
 private:
     void parseWordlist(const QString &filePath);
     void generateCrossword();
 
-    struct Word {
-        QString word;
-        QString hint;
-    };
-
-    QVector<Word> m_words;
+    QHash<QString, QString> m_hints;
 
     int m_rows = 0;
     int m_columns = 0;
 
+    Grid m_grid;
+    Answers m_answers;
 };
 
 #endif // CROSSWORD_H
