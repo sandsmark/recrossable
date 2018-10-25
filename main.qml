@@ -29,10 +29,9 @@ Window {
 
         Repeater {
             model: Crossword.rows * Crossword.columns
-            delegate: Rectangle {
+            delegate: DrawableCell {
                 width: 100
                 height: 100
-                border.width: 2
 
                 Text {
                     x: 10
@@ -40,15 +39,10 @@ Window {
                     text: Crossword.hintAt(index)
                 }
 
-                MouseArea {
+                Rectangle {
                     anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        currentHint.text = Crossword.hintTextAt(index)
-                    }
-                    onClicked: {
-                        console.log(Crossword.correctAt(index))
-                    }
+                    border.width: 2
+                    color: "transparent"
                 }
             }
         }

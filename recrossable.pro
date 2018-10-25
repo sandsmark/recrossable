@@ -23,7 +23,8 @@ SOURCES += \
     cwc/letterdict.cc \
     cwc/symbol.cc \
     cwc/timer.cc \
-    cwc/wordlist.cc
+    cwc/wordlist.cc \
+    drawablecell.cpp
 
 RESOURCES += qml.qrc
 
@@ -47,4 +48,5 @@ HEADERS += \
     cwc/main.hh \
     cwc/symbol.hh \
     cwc/timer.hh \
-    cwc/wordlist.hh
+    cwc/wordlist.hh \
+    drawablecell.h

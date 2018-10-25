@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "crossword.h"
+#include "drawablecell.h"
 
 #include "cwc/symbol.hh"
 
@@ -15,6 +16,7 @@ int main(int argc, char *argv[])
 
 
     QQmlApplicationEngine engine;
+    qmlRegisterType<DrawableCell>("com.iskrembilen", 1, 0, "DrawableCell");
     qmlRegisterSingletonType<Crossword>("com.iskrembilen", 1, 0, "Crossword", [](QQmlEngine *engine, QJSEngine*) -> QObject* {
         Crossword *crossword = new Crossword;
         engine->setObjectOwnership(crossword, QQmlEngine::JavaScriptOwnership);
