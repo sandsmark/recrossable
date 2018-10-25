@@ -13,8 +13,9 @@
 #include <QElapsedTimer>
 
 Crossword::Crossword(QObject *parent) : QObject(parent),
-    m_rows(4),
-    m_columns(4)
+    m_rows(5),
+    m_columns(4),
+    m_grid(m_columns, m_rows)
 {
     parseWordlist(":/nyt.tsv");
     generateCrossword();
@@ -25,7 +26,6 @@ QString Crossword::hintAt(const int index)
     if (m_answers.celltoclue.find(index) == m_answers.celltoclue.end()) {
         return QString();
     }
-
 
     int num = m_answers.celltoclue[index];
     QString ret = QString::number(num);
@@ -75,24 +75,12 @@ QStringList Crossword::hintsDown()
 
 QString Crossword::hintTextAt(int index)
 {
-    if (m_answers.celltoclue.find(index) == m_answers.celltoclue.end()) {
-        return QString();
+    if (m_answers.across.celltoanswer.find(index) != m_answers.across.celltoanswer.end()) {
+        return m_hints[QString::fromStdString(m_answers.across.celltoanswer[index])];
     }
-    index = m_answers.celltoclue[index];
-
-    if (m_answers.across.cluetoanswer.find(index) != m_answers.across.cluetoanswer.end()) {
-        return m_hints[QString::fromStdString(m_answers.across.cluetoanswer[index])];
+    if (m_answers.down.celltoanswer.find(index) != m_answers.down.celltoanswer.end()) {
+        return m_hints[QString::fromStdString(m_answers.down.celltoanswer[index])];
     }
-    if (m_answers.down.cluetoanswer.find(index) != m_answers.down.cluetoanswer.end()) {
-        return m_hints[QString::fromStdString(m_answers.down.cluetoanswer[index])];
-    }
-//    return QString();
-//    if (m_answers.across.celltoanswer.find(index) != m_answers.across.celltoanswer.end()) {
-//        return m_hints[QString::fromStdString(m_answers.across.celltoanswer[index])];
-//    }
-//    if (m_answers.down.celltoanswer.find(index) != m_answers.down.celltoanswer.end()) {
-//        return m_hints[QString::fromStdString(m_answers.down.celltoanswer[index])];
-//    }
     return QString();
 }
 

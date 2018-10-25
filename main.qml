@@ -15,9 +15,12 @@ Window {
             bottomMargin: 20
             horizontalCenter: parent.horizontalCenter
         }
+        font.pointSize: 20
+        width: parent.width / 3
     }
 
     Grid {
+        id: mainGrid
         anchors.centerIn: parent
 
         spacing: 10
@@ -56,6 +59,8 @@ Window {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: 10
+            right: mainGrid.left
+            rightMargin: 10
         }
 
         Repeater {
