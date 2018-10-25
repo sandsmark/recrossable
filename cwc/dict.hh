@@ -22,37 +22,39 @@
 #ifndef CWC_DICT_HH
 #define CWC_DICT_HH
 
+#include "symbol.hh"
+
 //////////////////////////////////////////////////////////////////////
 
-struct symbollink {
-    symbol symb;
+struct SymbolLink {
+    Symbol symb;
     static int instancecount;
-    symbollink *target, *next;
-    symbollink *getlink(symbol);
-    symbollink();
-    symbollink *addlink(symbol);
-    void addword(symbol *, int);
-    bool findpossible(symbol *s, int len, int pos, symbolset &ss);
+    SymbolLink *target, *next;
+    SymbolLink *getlink(Symbol);
+    SymbolLink();
+    SymbolLink *addlink(Symbol);
+    void addword(Symbol *, int);
+    bool findpossible(Symbol *s, int len, int pos, SymbolSet &ss);
     void dump(char *prefix = 0, int len = 0);
 };
 
-class dict {
+class Dict {
 public:
-    dict();
-    virtual ~dict();
+    Dict();
+    virtual ~Dict();
 
-    virtual void load(const string &fn) = 0;
-    virtual symbolset findpossible(symbol *s, int len, int pos) = 0;
+    virtual void load(const std::string &fn) = 0;
+    virtual SymbolSet findpossible(Symbol *s, int len, int pos) = 0;
 };
 
-class btree_dict : public dict {
-    symbollink primary[MAXWORDLEN];
+class BtreeDict : public Dict {
+    SymbolLink primary[MAXWORDLEN];
 public:
-    btree_dict();
-    void addword(symbol *, int);
-    void load(const string &fn);
+    BtreeDict();
+    void addword(Symbol *, int);
+    void load(const std::string &fn);
     int size();
-    symbolset findpossible(symbol *s, int len, int pos);
+    SymbolSet findpossible(Symbol *s, int len, int pos);
     void dump(int len);
 };
 

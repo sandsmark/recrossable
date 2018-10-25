@@ -24,49 +24,43 @@
 
 #include <vector>
 #include <iostream>
-#include <set>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <sstream>
 #include "symbol.hh"
 #include "dict.hh"
 
-using std::vector;
-using std::cout;
-using std::endl;
-using std::set;
-using std::map;
-
-class cell;
-class wordblock;
-class grid;
-struct wordref {
+class Cell;
+class WordBlock;
+class Grid;
+struct WordRef {
     int pos;
-    wordblock *wbl;
+    WordBlock *wbl;
 };
 
-class cell {
-    vector<wordref> wbl; int wbl_size;
+class Cell {
+    std::vector<WordRef> wbl; int wbl_size;
     int attempts;
-    symbol symb;
-    symbol preferred;
+    Symbol symb;
+    Symbol preferred;
     bool locked;
 public:
-    static cell outside_cell;
+    static Cell outside_cell;
 
-    cell(symbol s = symbol::empty); // ctor
-    void setsymbol(const symbol &s);
+    Cell(Symbol s = Symbol::empty); // ctor
+    void setsymbol(const Symbol &s);
 
     // structural methods
-    void addword(wordblock *w, int pos);
+    void addword(WordBlock *w, int pos);
     int numwords() { return wbl_size; }
-    wordblock &getwordblock(int wordno) { return *wbl[wordno].wbl; }
+    WordBlock &getwordblock(int wordno) { return *wbl[wordno].wbl; }
     int getpos(int wordno) { return wbl[wordno].pos; }
     void clearwords() { wbl.clear(); }
 
-    symbol getsymbol() { return symb; }
-    symbol getpreferred() { return preferred; }
+    Symbol getsymbol() { return symb; }
+    Symbol getpreferred() { return preferred; }
 
-    bool haspreferred() { return preferred != symbol::none; }
+    bool haspreferred() { return preferred != Symbol::none; }
     void usepreferred();
     void remove(); // remove from grid (make outsider)
     void clear(bool setpreferred = true); // make empty
@@ -75,7 +69,7 @@ public:
     bool isinside() { return !isoutside(); }
 
     bool isempty() {
-        return symb == symbol::empty;
+        return symb == Symbol::empty;
     }
 
     bool isfilled();
@@ -85,12 +79,12 @@ public:
     bool islocked() { return locked; }
     void lock() { locked = true; }
 
-    symbolset findpossible(dict &d);
+    SymbolSet findpossible(Dict &d);
 
-    friend ostream&operator<<(ostream &os, cell &c);
+    friend std::ostream&operator<<(std::ostream &os, Cell &c);
 
     void dumpwords() {
-        cout << "got " << numwords() << " words." << endl;
+        std::cout << "got " << numwords() << " words." << std::endl;
     }
 
     // statistics
@@ -98,10 +92,10 @@ public:
     int dependencydegree(int level);
 
     // Build a mapping from cell numbers to clue numbers:
-    map<int,int> celltoclue();
+    std::unordered_map<int,int> celltoclue();
 
-    string tostring();
-    string touppercasestring();
+    std::string tostring();
+    std::string touppercasestring();
 };
 
 struct coord {
@@ -111,41 +105,39 @@ public:
     bool operator==(const coord &c) const { return ((x==c.x)&&(y==c.y)); }
 };
 
-ostream & operator<<(ostream &os, coord &c);
+std::ostream & operator<<(std::ostream &os, coord &c);
 
-class cluenumbering {
+class ClueNumbering {
 public:
-    set<int> cells;
-    set<int> clues;
-    map<int,string> cluetoanswer;
-    map<int,string> celltoanswer;
-    void dump(ostream &os);
-    void dump_to_svg(ostream &os, const string & id_prefix, const string & font_size_string);
+    std::unordered_set<int> cells;
+    std::unordered_set<int> clues;
+    std::unordered_map<int,std::string> cluetoanswer;
+    std::unordered_map<int,std::string> celltoanswer;
+    void dump(std::ostream &os);
 };
 
-class answers {
+class Answers {
 public:
-    map<int,int> celltoclue;
-    cluenumbering across;
-    cluenumbering down;
-    void dump(ostream &os);
-    void dump_to_svg(ostream &os, const string & font_size_string);
+    std::unordered_map<int,int> celltoclue;
+    ClueNumbering across;
+    ClueNumbering down;
+    void dump(std::ostream &os);
 };
 
-class grid {
+class Grid {
 protected:
-    vector<cell> cls; int cls_size;
-    vector<wordblock*> wbl;
+    std::vector<Cell> cls; int cls_size;
+    std::vector<WordBlock*> wbl;
     void init_grid(int w, int h);
 
 public:
     bool verbose;
     int w, h;
-    grid(int width = 10, int height = 10);
+    Grid(int width = 10, int height = 10);
 
-    inline cell &cellno(int n) {
+    inline Cell &cellno(int n) {
         if ((n < 0)||(n >= cls_size))
-            return cell::outside_cell;
+            return Cell::outside_cell;
         return cls[n];
     }
 
@@ -153,47 +145,28 @@ public:
         return y*w + x;
     }
 
-    inline cell &cellat(int x, int y) {
+    inline Cell &cellat(int x, int y) {
         if ((x < 0)||(x >= w)||(y < 0)||(y>=h))
-            return cell::outside_cell;
+            return Cell::outside_cell;
         return cls[y*w + x];
     }
 
-    cell &cellat(coord &c) {
+    Cell &cellat(coord &c) {
         return cellat(c.x, c.y);
     }
 
-    cell &operator()(int x, int y) { return cellat(x, y); }
-    cell &operator()(coord &c) { return cellat(c); }
-    cell &operator()(int p) { return cellno(p); }
+    Cell &operator()(int x, int y) { return cellat(x, y); }
+    Cell &operator()(coord &c) { return cellat(c); }
+    Cell &operator()(int p) { return cellno(p); }
 
-    void load_template(const string &filename);
-    void load(const string &fn);
+    void load_template(const std::string &filename);
+    void load(const std::string &fn);
     void buildwords();
 
-    void dump(ostream &os, setup_s::output_format_t, answers * an);
-    void dump_ascii(ostream &os, answers * an);
-    void dump_simple(ostream &os);
-    void dump_svg(ostream &os,
-                  answers * an,
-                  float scale_defaults,
-                  bool draw_solutions,
-                  bool draw_clue_numbers,
-                  float top_left_x_mm,
-                  float top_left_y_mm);
-    void draw_cell_svg(ostream &os,
-                       bool light,
-                       int cluenumber,
-                       int gridx,
-                       int gridy,
-                       int gridwidth,
-                       float scale_defaults,
-                       float top_left_x_mm,
-                       float top_left_y_mm,
-                       bool drawletter,
-                       const string & letter);
+    void dump(std::ostream &os, Answers * an);
+    void dump_ascii(std::ostream &os, Answers * an);
 
-    void dump_ggrid(ostream &os);
+    void dump_ggrid(std::ostream &os);
 
     void lock();
 
@@ -210,35 +183,35 @@ public:
     int celldependencies(int cellno, int level);
 
     // build clue numbering
-    answers getanswers();
+    Answers getanswers();
 };
 
 
-struct cellref {
+struct CellRef {
     int cellno;
-    grid *g;
-    cellref(int no, grid &gr) : cellno(no), g(&gr) {}
-    cell *operator ->() { return &g->cellno(cellno); }
-    cell *ptr() { return &g->cellno(cellno); }
+    Grid *g;
+    CellRef(int no, Grid &gr) : cellno(no), g(&gr) {}
+    Cell *operator ->() { return &g->cellno(cellno); }
+    Cell *ptr() { return &g->cellno(cellno); }
 };
 
 
-class wordblock {
-    vector<cellref> cls; int cls_size;
+class WordBlock {
+    std::vector<CellRef> cls; int cls_size;
 public:
-    wordblock();
-    void addcell(int n, grid &gr) {
-        cls.push_back(cellref(n, gr));
+    WordBlock();
+    void addcell(int n, Grid &gr) {
+        cls.push_back(CellRef(n, gr));
         cls_size++;
     }
     int length() { return cls_size; }
-    void getword(symbol *);
+    void getword(Symbol *);
     int getcellno(int pos) {
         if ((pos < 0)||(pos >= cls_size)) throw error("Bug");
         return cls[pos].cellno;
     }
-    cell &getcell(int pos) {
-        if ((pos < 0)||(pos >= cls_size)) return cell::outside_cell;
+    Cell &getcell(int pos) {
+        if ((pos < 0)||(pos >= cls_size)) return Cell::outside_cell;
         return *cls[pos].ptr();
     }
 };

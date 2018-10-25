@@ -28,47 +28,42 @@
 #include "symbol.hh"
 #include "dict.hh"
 
-using std::cout;
-using std::endl;
-using std::flush;
-using std::ifstream;
-
 //////////////////////////////////////////////////////////////////////
 // class symbollink
 
-int symbollink::instancecount = 0;
+int SymbolLink::instancecount = 0;
 
-symbollink::symbollink() : symb(symbol::outside), target(0), next(0) {
+SymbolLink::SymbolLink() : symb(Symbol::outside), target(0), next(0) {
     instancecount++;
 }
 
-symbollink *symbollink::addlink(symbol s) {
-    symbollink *sl = new symbollink();
+SymbolLink *SymbolLink::addlink(Symbol s) {
+    SymbolLink *sl = new SymbolLink();
     sl->symb = s;
     sl->next = target;
     target = sl;
     return target;
 }
 
-void symbollink::addword(symbol *str, int n) {
+void SymbolLink::addword(Symbol *str, int n) {
     if (n == 0) return;
     if (!isalpha(str[0]))
         throw error("!!!");
-    symbollink *sl = getlink(str[0]);
+    SymbolLink *sl = getlink(str[0]);
     if (sl == 0)
         sl = addlink(str[0]);
     sl->addword(str+1, n-1);
 }
 
-symbollink *symbollink::getlink(symbol s) {
-    for (symbollink *sl = target; sl != 0; sl = sl->next) {
+SymbolLink *SymbolLink::getlink(Symbol s) {
+    for (SymbolLink *sl = target; sl != 0; sl = sl->next) {
         if (sl->symb == s) return sl;
     }
     return 0;
 }
 
-bool symbollink::findpossible(symbol *s, int len,
-                              int pos, symbolset &ss) {
+bool SymbolLink::findpossible(Symbol *s, int len,
+                              int pos, SymbolSet &ss) {
     if ((target == 0)&&(len==0)) {
         if (pos == 0)
             ss |= symb.getsymbolset();
@@ -77,10 +72,10 @@ bool symbollink::findpossible(symbol *s, int len,
     if ((target==0)||(len==0))
         return false;
 
-    if (s[0] == symbol::empty) {
+    if (s[0] == Symbol::empty) {
         // search each subtree and OR the result.
         bool atallany = false;
-        for (symbollink *sl = target; sl != 0; sl = sl->next) {
+        for (SymbolLink *sl = target; sl != 0; sl = sl->next) {
             bool any = sl->findpossible(s+1, len-1, pos-1, ss);
             if (any) {
                 atallany = true;
@@ -91,7 +86,7 @@ bool symbollink::findpossible(symbol *s, int len,
         return atallany;
     } else {
         // search specific subtree
-        symbollink *sl = getlink(s[0]);
+        SymbolLink *sl = getlink(s[0]);
         if (sl == 0)
             return false;
         else {
@@ -105,22 +100,22 @@ bool symbollink::findpossible(symbol *s, int len,
     }
 }
 
-void symbollink::dump(char *prefix, int len) {
+void SymbolLink::dump(char *prefix, int len) {
     if (target == 0) {
-        cout << prefix << symb << endl;
+        std::cout << prefix << symb << std::endl;
         return;
     }
 
     if (prefix == 0) {
         prefix = new char[256];
         prefix[0] = '\0';
-        for (symbollink *sl = target; sl; sl = sl->next) {
+        for (SymbolLink *sl = target; sl; sl = sl->next) {
             sl->dump(prefix, len);
         }
         delete[] prefix;
     } else {
         prefix[len++] = symb; prefix[len] = '\0';
-        for (symbollink *sl = target; sl; sl = sl->next) {
+        for (SymbolLink *sl = target; sl; sl = sl->next) {
             sl->dump(prefix, len);
         }
         prefix[--len] = '\0';
@@ -129,32 +124,32 @@ void symbollink::dump(char *prefix, int len) {
 //////////////////////////////////////////////////////////////////////
 // dict
 
-dict::dict() {
+Dict::Dict() {
 }
 
-dict::~dict() {
+Dict::~Dict() {
 }
 
 //////////////////////////////////////////////////////////////////////
 // btree_dict
 
-btree_dict::btree_dict() : primary() {
+BtreeDict::BtreeDict() : primary() {
 }
 
-void btree_dict::addword(symbol *str, int n) {
+void BtreeDict::addword(Symbol *str, int n) {
     primary[n].addword(str, n);
 }
 
-int btree_dict::size() {
-    return symbollink::instancecount;
+int BtreeDict::size() {
+    return SymbolLink::instancecount;
 }
 
-void btree_dict::load(const string &fn) {
-    cout << "Loading wordlist and building dictionary... " << flush;
+void BtreeDict::load(const std::string &fn) {
+    std::cout << "Loading wordlist and building dictionary... " << std::flush;
     bool chset[256];
     for (int i=0;i<256;i++) chset[i] = false;
 
-    ifstream f(fn.c_str());
+    std::ifstream f(fn.c_str());
     if (!f.is_open()) throw error("Failed to open dictionary file");
     char sz[256];
     int wordcount = 0, wordsused = 0;
@@ -172,7 +167,7 @@ void btree_dict::load(const string &fn) {
             }
         }
         if (ok) {
-            symbol *symbs = new symbol[wlen];
+            Symbol *symbs = new Symbol[wlen];
             for (int i=0;i<wlen;i++) {
                 symbs[i] = sz[i];
                 chset[(unsigned char)sz[i]] = true;
@@ -187,21 +182,21 @@ void btree_dict::load(const string &fn) {
     }
     for (int i=0;i<256;i++) {
         if (chset[i]) {
-            symbol s[1];
+            Symbol s[1];
             s[0] = i;
             addword(s, 1);
         }
     }
-    cout << "ok" << endl;
-    cout << wordsused << " of " << wordcount << " words used." << endl;
+    std::cout << "ok" << std::endl;
+    std::cout << wordsused << " of " << wordcount << " words used." << std::endl;
 }
 
-symbolset btree_dict::findpossible(symbol *s, int len, int pos) {
-    symbolset ss = 0;
+SymbolSet BtreeDict::findpossible(Symbol *s, int len, int pos) {
+    SymbolSet ss = 0;
     primary[len].findpossible(s, len, pos, ss);
     return ss;
 }
 
-void btree_dict::dump(int len) {
+void BtreeDict::dump(int len) {
     primary[len].dump();
 }

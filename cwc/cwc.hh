@@ -23,35 +23,33 @@
 #define CWC_CWC_HH
 
 #include "main.hh"
+#include "grid.hh"
 
 #include <map>
 #include <list>
 
-using std::pair;
-using std::list;
-
 //////////////////////////////////////////////////////////////////////
 
-class backtracker;
+class Backtracker;
 
-class walker {
+class Walker {
 protected:
-    vector<int> cellno;
+    std::vector<int> cellno;
     int current;
-    grid &g;
+    Grid &g;
 
     bool current_oneof(int *no, int n);
     int limit;
     bool inited;
 
 public:
-    walker(grid &thegrid);
-    virtual ~walker() {}
+    Walker(Grid &thegrid);
+    virtual ~Walker() {}
     void backto(int dest);
     void backto_oneof(int dest[], int n);
-    void backto_oneof(backtracker &bt);
+    void backto_oneof(Backtracker &bt);
     int getcurrent() { return current; }
-    cell &currentcell();
+    Cell &currentcell();
     void forward();
     void backward(bool savepreferred = false);
     int stepno() { return cellno.size() + 1; }
@@ -82,64 +80,64 @@ public:
 };
 
 
-class prefix_walker : public walker {
+class PrefixWalker : public Walker {
 public:
-    prefix_walker(grid &g) : walker(g) {};
+    PrefixWalker(Grid &g) : Walker(g) {}
 protected:
     virtual void step_forward();
 };
 
-class flood_walker : public walker {
+class FloodWalker : public Walker {
 public:
-    flood_walker(grid &g);
+    FloodWalker(Grid &g);
 protected:
     void step_forward();
 };
 
 //////////////////////////////////////////////////////////////////////
 
-class backtracker {
+class Backtracker {
 protected:
-    grid &g;
+    Grid &g;
 public:
-    backtracker(grid &thegrid);
-    virtual ~backtracker() {}
+    Backtracker(Grid &thegrid);
+    virtual ~Backtracker() {}
     // upon a dead end, this method will track back to
     // a cell where a new solution should be tried.
-    virtual void backtrack(walker &w) =  0;
+    virtual void backtrack(Walker &w) =  0;
     virtual bool stophere(int p) = 0;
 };
 
-class naive_backtracker : public backtracker {
+class NaiveBacktracker : public Backtracker {
 public:
-    naive_backtracker(grid &thegrid) : backtracker(thegrid) {}
-    void backtrack(walker &w);
-    bool stophere(coord &c) { return true; }
+    NaiveBacktracker(Grid &thegrid) : Backtracker(thegrid) {}
+    void backtrack(Walker &w) override;
+    bool stophere(int p) override { return true; }
 };
 
-class smart_backtracker : public backtracker {
+class SmartBacktracker : public Backtracker {
     // first = pos, second = bt point.
     // nb: pair<> is sorted on the first element (according to STL doc).
-    typedef pair<int, int> cpair;
-    list<cpair> bt_points;
+    typedef std::pair<int, int> cpair;
+    std::list<cpair> bt_points;
 public:
-    smart_backtracker(grid &thegrid) : backtracker(thegrid) {}
-    void backtrack(walker &w);
-    bool stophere(int p);
+    SmartBacktracker(Grid &thegrid) : Backtracker(thegrid) {}
+    void backtrack(Walker &w) override;
+    bool stophere(int p) override;
 };
 
-class compiler {
+class Compiler {
 protected:
     int numcells;
     int numalpha;
     double rejected;
-    grid &g;
-    walker &w;
-    backtracker &bt;
-    dict &d;
+    Grid &g;
+    Walker &w;
+    Backtracker &bt;
+    Dict &d;
     bool compile_rest(double rejected = 0);
 public:
-    compiler(grid &thegrid, walker &thewalker, backtracker &thebacktracker, dict &thedict);
+    Compiler(Grid &thegrid, Walker &thewalker, Backtracker &thebacktracker, Dict &thedict);
     void compile();
 
     bool verbose, findall, showsteps;
@@ -147,6 +145,6 @@ public:
 };
 
 void dodictbench();
-int dictbench(dict &d);
+int dictbench(Dict &d);
 
 #endif // CWC_CWC_HH

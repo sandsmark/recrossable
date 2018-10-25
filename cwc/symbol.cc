@@ -21,9 +21,6 @@
 
 #include <iostream>
 
-using std::cout;
-using std::endl;
-
 #include "symbol.hh"
 
 #include <stdlib.h>
@@ -31,28 +28,29 @@ using std::endl;
 //////////////////////////////////////////////////////////////////////
 // class symbol
 
-char symbol::alphabet[32];
-symbol symbol::alphindex[256];
+char Symbol::alphabet[32];
+Symbol Symbol::alphindex[256];
 
-int symbol::symballoc = 0;
-symbol symbol::outside;
-symbol symbol::none;
-symbol symbol::empty;
+int Symbol::symballoc = 0;
+Symbol Symbol::outside;
+Symbol Symbol::none;
+Symbol Symbol::empty;
 
-symbol symbol::symbolbit(symbolset ss) {
-    symbol s;
-    for (symbolset i=1,n=0; i; i<<=1,n++) {
+Symbol Symbol::symbolbit(SymbolSet ss) {
+    Symbol s;
+    for (SymbolSet i=1,n=0; i; i<<=1,n++) {
         if (ss&i)
             s.symb = n;
     }
     return s;
 }
 
-symbol symbol::alloc(char ch) {
-    symbol s;
+Symbol Symbol::alloc(char ch) {
+    Symbol s;
     if (symballoc >= 32) {
-        for (int i=0; i<32;i++) cout << alphabet[i]; cout << endl;
-        cout << ch << ' ' << int(ch) << endl;
+        for (int i=0; i<32;i++) std::cout << alphabet[i];
+        std::cout << std::endl;
+        std::cout << ch << ' ' << int(ch) << std::endl;
         throw error("Too many symbols");
     }
 
@@ -63,50 +61,50 @@ symbol symbol::alloc(char ch) {
     return s;
 }
 
-void symbol::buildindex() {
+void Symbol::buildindex() {
     for (int i=0;i<32;i++)
         alphabet[i] = UNDEF;
     for (int i=0;i<256;i++)
         alphindex[i].symb = UNDEF;
     symballoc = 0;
-    none = symbol::alloc('/');
-    empty = symbol::alloc('+');
-    outside = symbol::alloc(' ');
+    none = Symbol::alloc('/');
+    empty = Symbol::alloc('+');
+    outside = Symbol::alloc(' ');
 }
 
-symbol::symbol(char ch) {
+Symbol::Symbol(char ch) {
     symb = alphindex[(unsigned char)ch].symb;
     if (symb == UNDEF)
-        *this = symbol::alloc(ch);
+        *this = Symbol::alloc(ch);
 }
 
-symbolset pickbit(symbolset &ss) {
+SymbolSet pickbit(SymbolSet &ss) {
     int a[32], n = 0;
     for (int i=1; i; i<<=1) {
         if (ss & i)
             a[n++] = i;
     }
     if (n==0) return 0;
-    symbolset bit = a[rand()%n];
+    SymbolSet bit = a[rand()%n];
     ss &= ~bit;
     return bit;
 }
 
-int wordlen(symbol *st) {
+int wordlen(Symbol *st) {
     int n = 0;
-    while (st[n] != symbol::outside) n++;
+    while (st[n] != Symbol::outside) n++;
     return n;
 }
 
-ostream &operator <<(ostream &os, symbol *s) {
-    while (*s != symbol::outside) {
+std::ostream &operator <<(std::ostream &os, Symbol *s) {
+    while (*s != Symbol::outside) {
         os << *s;
         s++;
     }
     return os;
 }
 
-int numones(symbolset ss) {
+int numones(SymbolSet ss) {
     int n = 0;
     for (int i=1; i; i <<= 1) {
         if (ss&i)
@@ -115,7 +113,7 @@ int numones(symbolset ss) {
     return n;
 }
 
-int symbol::numalpha() {
+int Symbol::numalpha() {
     int n = 0;
     for (int i=0; i<32; i++)
         if (isalpha(alphabet[i]))

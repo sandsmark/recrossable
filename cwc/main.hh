@@ -27,13 +27,11 @@
 
 #include <string>
 
-using std::string;
-
 class error {
-    string errmsg;
+    std::string errmsg;
 public:
-    error(const string &msg) : errmsg(msg) {}
-    const string &what() { return errmsg; }
+    error(const std::string &msg) : errmsg(msg) {}
+    const std::string &what() { return errmsg; }
 };
 
 struct setup_s {
@@ -45,7 +43,7 @@ struct setup_s {
     walker_t walkertype;
     dict_t dictstyle;
     bool verbose, showsteps, showallsteps;
-    string dictfile, gridfile, svgfile;
+    std::string dictfile, gridfile, svgfile;
     gridformat_t gridformat;
     bool benchdict;
     bool setseed;

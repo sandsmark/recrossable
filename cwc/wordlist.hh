@@ -25,27 +25,25 @@
 #include <vector>
 #include "symbol.hh"
 
-using std::vector;
-
 /**
  * the wordlist is a container class for the words loaded from
  * a file. Words are referenced by a integer index. The words
  * are sorted.
  */
 
-class wordlist {
+class WordList {
 protected:
-    vector<symbol*> widx;
-    bool wordok(const string &st);
+    std::vector<Symbol*> widx;
+    bool wordok(const std::string &st);
     int nwords;
 public:
-    symbolset allalpha;
-    wordlist();
-    void load(const string &fn);
+    SymbolSet allalpha;
+    WordList();
+    void load(const std::string &fn);
     int numwords() {
         return widx.size();
     }
-    symbol *operator[](int i) {
+    Symbol *operator[](int i) {
         return widx[i];
     }
 };

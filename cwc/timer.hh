@@ -29,14 +29,14 @@
  * measuring process time (not real time).
  */
 
-class timer {
+class Timer {
 protected:
     clock_t elapsed, starttime;
     bool running;
     clock_t getptime();
 public:
     clock_t getticks();
-    timer();
+    Timer();
     void start();
     void stop();
     void reset();

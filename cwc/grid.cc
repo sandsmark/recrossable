@@ -26,18 +26,14 @@
 
 #include "grid.hh"
 
-using std::ifstream;
-using std::ostringstream;
-using std::transform;
-
 //////////////////////////////////////////////////////////////////////
 // wordblock
 
-wordblock::wordblock() {
+WordBlock::WordBlock() {
     cls_size = 0;
 }
 
-void wordblock::getword(symbol *s) {
+void WordBlock::getword(Symbol *s) {
     int i, len = cls.size();
     for (i = 0; i < len; i++)
         s[i] = cls[i]->getsymbol();
@@ -46,58 +42,58 @@ void wordblock::getword(symbol *s) {
 //////////////////////////////////////////////////////////////////////
 // class cell
 
-cell cell::outside_cell;
+Cell Cell::outside_cell;
 
-cell::cell(symbol s) :
-    wbl_size(0), attempts(0), symb(s), preferred(symbol::none), locked(false) {
+Cell::Cell(Symbol s) :
+    wbl_size(0), attempts(0), symb(s), preferred(Symbol::none), locked(false) {
 }
 
-void cell::addword(wordblock *w, int pos) {
-    struct wordref wr = {pos, w};
+void Cell::addword(WordBlock *w, int pos) {
+    struct WordRef wr = {pos, w};
     wbl.push_back(wr);
     wbl_size++;
 }
 
-void cell::setsymbol(const symbol &s) {
+void Cell::setsymbol(const Symbol &s) {
     if (locked)
         throw error("Attempt to set symbol in locked cell");
-    if (!(s == symbol::empty) && !(s == symbol::outside))
+    if (!(s == Symbol::empty) && !(s == Symbol::outside))
         attempts++;
     symb = s;
 }
 
-void cell::remove() {
-    symb = symbol::outside;
+void Cell::remove() {
+    symb = Symbol::outside;
 }
 
-void cell::clear(bool setpreferred) {
+void Cell::clear(bool setpreferred) {
     if (setpreferred)
         preferred = symb;
     else
-        preferred = symbol::none;
-    symb = symbol::empty;
+        preferred = Symbol::none;
+    symb = Symbol::empty;
 }
 
-ostream &operator << (ostream &os, cell &c) {
+std::ostream &operator << (std::ostream &os, Cell &c) {
     return os << c.symb;
 }
 
-bool cell::isoutside() {
-    return symb == symbol::outside;
+bool Cell::isoutside() {
+    return symb == Symbol::outside;
 }
 
-bool cell::isfilled() {
-    return (symb!=symbol::empty)&&(symb!=symbol::outside);
+bool Cell::isfilled() {
+    return (symb!=Symbol::empty)&&(symb!=Symbol::outside);
 }
 
-string cell::tostring() {
-    ostringstream s;
+std::string Cell::tostring() {
+    std::ostringstream s;
     s << symb;
     return s.str();
 }
 
-string cell::touppercasestring() {
-    string s = tostring();
+std::string Cell::touppercasestring() {
+    std::string s = tostring();
     transform(s.begin(), s.end(), s.begin(), toupper);
     return s;
 }
@@ -108,26 +104,26 @@ string cell::touppercasestring() {
 coord::coord(int _x, int _y) : x(_x), y(_y) {
 }
 
-ostream &operator << (ostream &os, coord &c) {
+std::ostream &operator << (std::ostream &os, coord &c) {
     return os << c.x << ',' << c.y;
 }
 
 //////////////////////////////////////////////////////////////////////
 // class grid
 
-grid::grid(int width, int height)
+Grid::Grid(int width, int height)
     : cls(0), cls_size(0), verbose(false) {
     init_grid(width, height);
-    cellno(-1).setsymbol(symbol::outside);
+    cellno(-1).setsymbol(Symbol::outside);
     buildwords();
 }
 
-void grid::init_grid(int w, int h) {
+void Grid::init_grid(int w, int h) {
     this->w = w;
     this->h = h;
     cls.clear();
     for (int i = 0; i < w*h; i++)
-        cls.push_back(cell());
+        cls.push_back(Cell());
     cls_size = cls.size();
 }
 
@@ -159,37 +155,37 @@ void grid::get_template_v(const coord &c, symbol *s, int &len, int &pos) {
 }
 **/
 
-symbolset cell::findpossible(dict &d) {
+SymbolSet Cell::findpossible(Dict &d) {
     int nwords = numwords();
     if (nwords == 0) throw error("Bugger");
 
-    symbolset ss = ~0;
+    SymbolSet ss = ~0;
 
     for (int i = 0; i < nwords; i++) {
 
         int pos = getpos(i);
-        wordblock &wb = getwordblock(i);
+        WordBlock &wb = getwordblock(i);
         int len = wb.length();
 
-        symbol word[len+1]; word[len] = symbol::outside;
+        Symbol word[len+1]; word[len] = Symbol::outside;
 
         wb.getword(word);
 
         ss &= d.findpossible(word, len, pos); // intersect solutions
-        if (setup.verbose) {
-            cout << "vertical: "; dumpsymbollist(word, len);
-            dumpset(ss);
-        }
+//        if (setup.verbose) {
+//            cout << "vertical: "; dumpsymbollist(word, len);
+//            dumpset(ss);
+//        }
     }
 
     return ss;
 }
 
 
-void grid::load_template(const string &filename) {
-    ifstream tf(filename.c_str());
+void Grid::load_template(const std::string &filename) {
+    std::ifstream tf(filename.c_str());
     if (!tf.is_open()) throw error("Failed to open pattern file");
-    string istr;
+    std::string istr;
     getline(tf, istr);
     w = h = 1;
     sscanf(istr.c_str(), "%d %d", &w, &h);
@@ -222,29 +218,29 @@ void grid::load_template(const string &filename) {
     lock();
 }
 
-void grid::load(const string &fn) {
+void Grid::load(const std::string &fn) {
     cls.clear();
     wbl.clear();
     w = h = 0;
 
-    ifstream f(fn.c_str());
+    std::ifstream f(fn.c_str());
     if (!f.is_open()) throw error("Failed to open file");
-    string ln;
+    std::string ln;
 
     while (!f.eof()) {
         getline(f, ln);
         const char *st = ln.c_str();
 
-        wordblock *wb = new wordblock();
+        WordBlock *wb = new WordBlock();
         int pos = 0;
         while (*st != '\0') {
             while (*st&&(!isdigit(*st))) st++;
             if (*st == '\0') break;
             int a = atoi(st);
             while (cls.size() <= unsigned(a))
-                cls.push_back(cell(symbol::outside));
+                cls.push_back(Cell(Symbol::outside));
             cls_size = cls.size();
-            cls[a].setsymbol(symbol::empty);
+            cls[a].setsymbol(Symbol::empty);
             wb->addcell(a, *this);
             cls[a].addword(wb, pos); pos++;
             while (*st && (isdigit(*st))) st++;
@@ -261,7 +257,7 @@ void grid::load(const string &fn) {
  * builds the words/cell structures when we use a square grid formation
  */
 
-void grid::buildwords() {
+void Grid::buildwords() {
     wbl.clear();
     for (int n = 0; n < numcells(); n++)
         cls[n].clearwords();
@@ -269,10 +265,10 @@ void grid::buildwords() {
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             int cno = cellnofromxy(x, y);
-            wordblock *w = 0;
+            WordBlock *w = 0;
             int pos = 0;
             while (cellat(x, y).isinside()) {
-                if (w==0) { w = new wordblock(); wbl.push_back(w); }
+                if (w==0) { w = new WordBlock(); wbl.push_back(w); }
                 w->addcell(cno, *this);
                 cellno(cno).addword(w, pos);
                 pos++;
@@ -283,10 +279,10 @@ void grid::buildwords() {
     }
     for (int x = 0; x < w; x++) {
         for (int y = 0; y < h; y++) {
-            wordblock *w = 0;
+            WordBlock *w = 0;
             int pos = 0;
             while (cellat(x, y).isinside()) {
-                if (w == 0) { w = new wordblock(); wbl.push_back(w); }
+                if (w == 0) { w = new WordBlock(); wbl.push_back(w); }
                 w->addcell(cellnofromxy(x, y), *this);
                 cellat(x, y).addword(w, pos);
                 pos++; y++;
@@ -295,36 +291,36 @@ void grid::buildwords() {
     }
 }
 
-void grid::dump_ggrid(ostream &os) {
+void Grid::dump_ggrid(std::ostream &os) {
     bool first = true;
-    for (vector<wordblock*>::iterator i = wbl.begin(); i != wbl.end(); i++) {
+    for (std::vector<WordBlock*>::iterator i = wbl.begin(); i != wbl.end(); i++) {
         int wlen = (*i)->length();
         for (int p = 0; p < wlen; p++) {
-            if (!first) cout << ' ';
+            if (!first) std::cout << ' ';
             os << (*i)->getcellno(p);
             first = false;
         }
-        os << endl; first = true;
+        os << std::endl; first = true;
     }
 }
 
 char bold[] = "\x1b[1m";
 char normal[] = "\x1b[0m";
 
-void grid::dump_ascii(ostream &os,answers * an) {
+void Grid::dump_ascii(std::ostream &os,Answers * an) {
     /* If we're given answers as well, then print the entries two
        high, possibly with a clue number in the top row. */
-    ostringstream vertbarstream;
+    std::ostringstream vertbarstream;
     vertbarstream << '+';
     for (int i=0;i<w;i++) vertbarstream << "---+";
-    string vertbar = vertbarstream.str();
+    std::string vertbar = vertbarstream.str();
 
-    os << vertbar << endl;
+    os << vertbar << std::endl;
     for (int y=0;y<h;y++) {
         if (an) {
             os << "|";
             for (int x=0; x<w; x++) {
-                cell &c = cellat(x,y);
+                Cell &c = cellat(x,y);
                 if (c.isoutside())
                     os << "XXX|";
                 else {
@@ -339,157 +335,28 @@ void grid::dump_ascii(ostream &os,answers * an) {
                         os << "   " << "|";
                 }
             }
-            os << endl;
+            os << std::endl;
         }
         // Now draw the rows with the letters:
         os << "|";
         for (int x=0; x<w; x++) {
-            cell &c = cellat(x,y);
+            Cell &c = cellat(x,y);
             if (c.isoutside())
                 os << "XXX|";
             else
                 os << ' ' <<  c << " |";
         }
-        os << endl;
-        os << vertbar << endl;
+        os << std::endl;
+        os << vertbar << std::endl;
     }
 }
 
-void grid::dump_svg(ostream &os, answers * an, float cell_side_mm, bool draw_solutions, bool draw_clue_numbers, float top_left_x_mm, float top_left_y_mm) {
-
-    float scale_defaults = cell_side_mm / 6.5;
-
-    for( int x = 0; x < w; ++x ) {
-        for( int y = 0; y < h; ++y ) {
-            cell &c = cellat(x,y);
-            bool light = ! c.isoutside();
-            int cluenumber = -1;
-            if (draw_clue_numbers) {
-                int cellnumber = y*w + x;
-                if( an->celltoclue.find(cellnumber) != an->celltoclue.end() )
-                    cluenumber = an->celltoclue[cellnumber];
-            }
-            draw_cell_svg(os, light, cluenumber, x, y, w, scale_defaults, top_left_x_mm, top_left_y_mm, false, "" );
-        }
-    }
-
-    if (draw_solutions) {
-        for( int x = 0; x < w; ++x ) {
-            for( int y = 0; y < h; ++y ) {
-                cell &c = cellat(x,y);
-                bool light = ! c.isoutside();
-                if (!light)
-                    continue;
-                int cluenumber = -1;
-                int cellnumber = y*w + x;
-                if( an->celltoclue.find(cellnumber) != an->celltoclue.end() )
-                    cluenumber = an->celltoclue[cellnumber];
-                draw_cell_svg(os, light, cluenumber, x, y, w, scale_defaults, top_left_x_mm, top_left_y_mm, true, c.touppercasestring() );
-            }
-        }
-    }
-}
-
-void grid::draw_cell_svg(ostream &os,
-                         bool light,
-                         int cluenumber,
-                         int gridx,
-                         int gridy,
-                         int gridwidth,
-                         float scale_defaults,
-                         float top_left_x_mm,
-                         float top_left_y_mm,
-                         bool drawletter,
-                         const string & letter) {
-
-    float fontsizecluenumber = 4 * scale_defaults;
-    float fontsizeletter = 9 * scale_defaults;
-
-    float cell_width = 6.5 * scale_defaults;
-    float cell_height = 6.5 * scale_defaults;
-
-    float stroke_width = 0.15 * scale_defaults;
-
-    int cellnumber = gridy * gridwidth + gridx;
-
-    string fillcolour = light ? "#ffffff" : "#b3b3b3";
-
-    float realx = top_left_x_mm + gridx * cell_width;
-    float realy = top_left_y_mm + gridy * cell_height;
-
-    float letterrectwidth = 0.823 * cell_width;
-    float letterrectheight = 0.76923 * cell_height;
-
-    float letterxoffset = (cell_width - letterrectwidth) / 2;
-    float letteryoffset = (2 * (cell_height - letterrectheight)) / 3;
-
-    if (drawletter) {
-
-        os << "    <flowRoot" << endl;
-        os << "       xml:space=\"preserve\"" << endl;
-        os << "       id=\"letterflow" << cellnumber << "\">";
-        os << "<flowRegion" << endl;
-        os << "         id=\"letterflowregion" << cellnumber << "\">";
-        os << "<rect" << endl;
-        os << "           id=\"letterrect" << cellnumber << "\"" << endl;
-        os << "           width=\"" << letterrectwidth << "mm\"" << endl;
-        os << "           height=\"" << letterrectheight << "mm\"" << endl;
-        os << "           x=\"" << (realx + letterxoffset) << "mm\"" << endl;
-        os << "           y=\"" << (realy + letteryoffset) << "mm\"/>";
-        os << "</flowRegion>";
-        os << "<flowPara" << endl;
-        os << "         id=\"letterflowpara" << cellnumber << "\"" << endl;
-        os << "         style=\"font-size:" << fontsizeletter << "pt;text-align:center;text-anchor:middle\">" << letter << "</flowPara></flowRoot>";
-        os << endl;
-
-    } else {
-
-        os << "    <rect" << endl;
-        os << "        width=\"" << cell_width << "mm\"" << endl;
-        os << "        height=\"" << cell_height << "mm\"" << endl;
-        os << "        x=\"" << realx << "mm\"" << endl;
-        os << "        y=\"" << realy << "mm\"" << endl;
-        os << "        style=\"fill:" << fillcolour << ";fill-opacity:1;stroke:#000000;stroke-width:" << stroke_width <<
-            "mm;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1\"" << endl;
-        os << "        id=\"cell" << cellnumber << "\"/>" << endl;
-
-        if (light) {
-            if (cluenumber>0) {
-                // Then also draw the clue number, slightly offset:
-
-                float numberx = realx + (0.3 * scale_defaults);
-                float numbery = realy + (1.6 * scale_defaults);
-
-                os << "    <text" << endl;
-                os << "       x=\"" << numberx << "mm\"" << endl;
-                os << "       y=\"" << numbery << "mm\"" << endl;
-                os << "       style=\"font-size:" << fontsizecluenumber << "pt;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Charter\"" << endl;
-                os << "       id=\"cluenumberincell" << cellnumber << "\"" << endl;
-                os << "       xml:space=\"preserve\"><tspan" << endl;
-                os << "         x=\"" << numberx << "mm\"" << endl;
-                os << "         y=\"" << numbery << "mm\"" << endl;
-                os << "         style=\"font-size:" << fontsizecluenumber << "pt\"" << endl;
-                os << "         id=\"cluenumberincell" << cellnumber << "b\">" << cluenumber << "</tspan></text>" << endl;
-            }
-        }
-    }
-}
-
-void grid::dump_simple(ostream &os) {
-    for (int y=0;y<h;y++) {
-        for (int x=0;x<w;x++) {
-            os << cellat(x, y);
-        }
-        os << endl;
-    }
-}
-
-void grid::dump(ostream &os, setup_s::output_format_t fmt, answers * an) {
+void Grid::dump(std::ostream &os, Answers * an) {
     if (w == 0) {
         for (int i = 0; unsigned(i) < wbl.size(); i++) {
             int len = wbl[i]->length();
-            symbol *s = new symbol[len + 1];
-            s[len] = symbol::outside;
+            Symbol *s = new Symbol[len + 1];
+            s[len] = Symbol::outside;
             wbl[i]->getword(s);
             os << s << ' ';
             delete[] s;
@@ -499,27 +366,24 @@ void grid::dump(ostream &os, setup_s::output_format_t fmt, answers * an) {
                 if (p) os << ',';
                 os << wbl[i]->getcellno(p);
             }
-            os << ')' << endl;
+            os << ')' << std::endl;
         }
         return;
     }
 
-    if (fmt == setup.ascii_format)
-        dump_ascii(os,an);
-    else if (fmt == setup.simple_format)
-        dump_simple(os);
+    dump_ascii(os,an);
 }
 
-answers grid::getanswers() {
-    answers c;
-    set<int> startcells;
+Answers Grid::getanswers() {
+    Answers c;
+    std::unordered_set<int> startcells;
     /* Index the start cells, and decide which are across and down
        clues: */
-    vector<wordblock*>::iterator i;
+    std::vector<WordBlock*>::iterator i;
     for (i=wbl.begin();
          i!=wbl.end();
          ++i) {
-        wordblock * wb = *i;
+        WordBlock * wb = *i;
         int l=wb->length();
         if (l>1) {
             // Then it's a real clue. Guess if it's across or down:
@@ -528,14 +392,14 @@ answers grid::getanswers() {
             bool across = (firstcell + 1) == secondcell;
             // Get the answer as a string:
             char * c_str=new char[l+1];
-            symbol *symbols = new symbol[l+1];
-            symbols[l] = symbol::outside;
+            Symbol *symbols = new Symbol[l+1];
+            symbols[l] = Symbol::outside;
             wb->getword(symbols);
             for(int k=0;k<l;++k) {
                 c_str[k] = (char)symbols[k];
             }
             c_str[l] = 0;
-            string string_version(c_str);
+            std::string string_version(c_str);
             delete [] symbols;
             delete [] c_str;
             // Add those:
@@ -551,7 +415,7 @@ answers grid::getanswers() {
     }
     /* Number the start cells: */
     int cluenumber=1;
-    set<int>::iterator s;
+    std::unordered_set<int>::iterator s;
     for(s=startcells.begin();
         s!=startcells.end();
         ++s) {
@@ -569,7 +433,7 @@ answers grid::getanswers() {
     return c;
 }
 
-float grid::interlockdegree() {
+float Grid::interlockdegree() {
     int interlocked = 0, total = 0;
     for (int y=0; y<h; y++) {
         for (int x=0;x<w;x++) {
@@ -585,7 +449,7 @@ float grid::interlockdegree() {
     return float(interlocked) / float(total);
 }
 
-float grid::attemptaverage() {
+float Grid::attemptaverage() {
     int sum = 0, n = 0;
     for (int y=0; y<h; y++) {
         for (int x=0; x<w; x++) {
@@ -598,7 +462,7 @@ float grid::attemptaverage() {
     return sum / float(n);
 }
 
-double grid::dependencydegree(int level) {
+double Grid::dependencydegree(int level) {
     int n = numcells(), ncell = 0;
     int d = 0;
     for (int i = 0; i < n; i++) {
@@ -610,36 +474,36 @@ double grid::dependencydegree(int level) {
     return double(d) / double(ncell);
 }
 
-int grid::celldependencies(int cno, int level) {
-    set<int> cnums;
+int Grid::celldependencies(int cno, int level) {
+    std::unordered_set<int> cnums;
     cnums.insert(cno);
 
     while (level--) {
-        set<int> newnums;
-        for (set<int>::iterator i = cnums.begin(); i != cnums.end(); i++) {
+        std::unordered_set<int> newnums;
+        for (std::unordered_set<int>::iterator i = cnums.begin(); i != cnums.end(); i++) {
             int clno = *i;
             int words = cellno(clno).numwords();
             for (int w = 0; w < words; w++) {
-                wordblock &wb = cellno(clno).getwordblock(w);
+                WordBlock &wb = cellno(clno).getwordblock(w);
                 int wlen = wb.length();
                 for (int j = 0; j < wlen; j++)
                     newnums.insert(wb.getcellno(j));
             }
         }
-        for (set<int>::iterator i = newnums.begin(); i != newnums.end(); i++)
+        for (std::unordered_set<int>::iterator i = newnums.begin(); i != newnums.end(); i++)
             cnums.insert(*i);
     }
     return cnums.size();
 }
 
-void grid::lock() {
+void Grid::lock() {
     int n = numcells();
     for (int i = 0; i < n; i++)
         if (!cellno(i).isempty())
             cellno(i).lock();
 }
 
-int grid::getempty() {
+int Grid::getempty() {
     int n = 0;
     int ncells = numcells();
     for (int i = 0 ; i< ncells; i++)
@@ -648,7 +512,7 @@ int grid::getempty() {
     return n;
 }
 
-int grid::numopen() {
+int Grid::numopen() {
     int n=0;
     int ncells = numcells();
     for (int i = 0; i < ncells; i++)
@@ -657,47 +521,20 @@ int grid::numopen() {
     return n;
 }
 
-void cluenumbering::dump(ostream &os) {
-    set<int>::iterator a;
+void ClueNumbering::dump(std::ostream &os) {
+    std::unordered_set<int>::iterator a;
     for(a=clues.begin();
         a!=clues.end();
         ++a) {
         int cluenumber=*a;
-        string answer=cluetoanswer[cluenumber];
-        os << cluenumber << ". " << answer << endl;
+        std::string answer=cluetoanswer[cluenumber];
+        os << cluenumber << ". " << answer << std::endl;
     }
 }
 
-void cluenumbering::dump_to_svg(ostream &os, const string & id_prefix, const string & font_style_string) {
-    set<int>::iterator a;
-    for(a=clues.begin();
-        a!=clues.end();
-        ++a) {
-        int cluenumber=*a;
-        string answer=cluetoanswer[cluenumber];
-        os << "<flowPara id=\"clue-" << id_prefix << "\" ";
-        os << "style=\"" << font_style_string << "\">";
-        string s(answer);
-        transform(s.begin(), s.end(), s.begin(), toupper);
-        os << "<flowSpan id=\"clue-number-span-" << id_prefix << "\" ";
-        os << " style=\"font-weight:bold;" << font_style_string << "\">";
-        os << cluenumber << "</flowSpan>. [" << s << "]</flowPara>";
-    }
-}
-
-void answers::dump(ostream &os) {
-    os << "Across:" << endl;
+void Answers::dump(std::ostream &os) {
+    os << "Across:" << std::endl;
     across.dump(os);
-    os << endl << "Down:" << endl;
+    os << std::endl << "Down:" << std::endl;
     down.dump(os);
-}
-
-void answers::dump_to_svg(ostream &os, const string & font_style_string) {
-    os << "<flowPara id=\"across-heading\" style=\"font-weight:bold;" << font_style_string << "\">Across:</flowPara>";
-    os << "<flowPara id=\"empty-down-spacer\" style=\"" << font_style_string << "\"></flowPara>";
-    across.dump_to_svg(os, "across", font_style_string);
-    os << "<flowPara id=\"empty-across-spacer-before\" style=\"" << font_style_string << "\"></flowPara>";
-    os << "<flowPara id=\"down-heading\" style=\"font-weight:bold;" << font_style_string << "\">Down:</flowPara>";
-    os << "<flowPara id=\"empty-across-spacer\" style=\"" << font_style_string << "\"></flowPara>";
-    down.dump_to_svg(os, "down", font_style_string);
 }

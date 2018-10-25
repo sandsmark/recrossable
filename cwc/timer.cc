@@ -23,23 +23,23 @@
 #include <time.h>
 #include "timer.hh"
 
-timer::timer() : elapsed(0), starttime(0), running(false) {
+Timer::Timer() : elapsed(0), starttime(0), running(false) {
 }
 
-clock_t timer::getptime() {
+clock_t Timer::getptime() {
     struct tms t;
     times(&t);
     return t.tms_utime;
 }
 
-void timer::start() {
+void Timer::start() {
     if (running)
         return;
     starttime = getptime();
     running = true;
 }
 
-void timer::stop() {
+void Timer::stop() {
     if (!running)
         return;
     clock_t stop_time = getptime();
@@ -47,18 +47,18 @@ void timer::stop() {
     running = false;
 }
 
-void timer::reset() {
+void Timer::reset() {
     elapsed = 0;
     starttime = getptime();
 }
 
-clock_t timer::getticks() {
+clock_t Timer::getticks() {
     clock_t t = elapsed;
     if (running)
         t += getptime() - starttime;
     return t;
 }
 
-int timer::getmsecs() {
+int Timer::getmsecs() {
     return (getticks() * 1000) / CLOCKS_PER_SEC;
 }

@@ -22,15 +22,13 @@
 #include <fstream>
 #include "wordlist.hh"
 
-using std::ifstream;
-
-wordlist::wordlist() {
+WordList::WordList() {
     allalpha = 0;
 }
 
 #define chunksize 8192
 
-bool wordlist::wordok(const string &fn) {
+bool WordList::wordok(const std::string &fn) {
     int n = fn.length();
     for (int i=0;i<n;i++)
         if (!isalpha(fn[i]))
@@ -38,16 +36,16 @@ bool wordlist::wordok(const string &fn) {
     return true;
 }
 
-void wordlist::load(const string &fn) {
-    ifstream f(fn.c_str());
+void WordList::load(const std::string &fn) {
+    std::ifstream f(fn.c_str());
     if (!f.is_open()) throw error("Failed to open file");
 
     widx.clear();
 
-    symbol *chunk = new symbol[chunksize];
+    Symbol *chunk = new Symbol[chunksize];
     int chunkused = 0;
 
-    string ln;
+    std::string ln;
     while (!f.eof()) {
         getline(f, ln);
         int wlen = ln.length();
@@ -57,17 +55,17 @@ void wordlist::load(const string &fn) {
             continue;
 
         if (chunksize - chunkused < wlen+1) {
-            chunk = new symbol[chunksize];
+            chunk = new Symbol[chunksize];
             chunkused = 0;
         }
 
-        symbol *addr = chunk + chunkused;
+        Symbol *addr = chunk + chunkused;
         for (int i=0; i<wlen; i++) {
-            symbol s = symbol(tolower(ln[i]));
+            Symbol s = Symbol(tolower(ln[i]));
             chunk[chunkused++] = s;
             allalpha |= s.getsymbolset();
         }
-        chunk[chunkused++] = symbol::outside;
+        chunk[chunkused++] = Symbol::outside;
 
         widx.push_back(addr);
     }

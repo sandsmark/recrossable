@@ -25,11 +25,6 @@
 
 #include "letterdict.hh"
 
-using std::cout;
-using std::flush;
-using std::endl;
-
-
 /*
                          1   2   3   4   5
    word length         +---+---+---+---+--
@@ -52,7 +47,7 @@ using std::endl;
 //////////////////////////////////////////////////////////////////////
 // letterdict
 
-letterdict::letterdict() : p(0), all(0) {
+LetterDict::LetterDict() : p(0), all(0) {
 }
 
 template<class T>
@@ -62,18 +57,18 @@ T **newptrarray(int n) {
     return p;
 }
 
-void letterdict::addword(symbol *st, int wordi) {
+void LetterDict::addword(Symbol *st, int wordi) {
     if (p == 0)
         p = newptrarray<intvec**>(MAXWORDLEN);
     if (all == 0)
-        all = newptrarray<symbolset>(MAXWORDLEN);
+        all = newptrarray<SymbolSet>(MAXWORDLEN);
 
     int wlen = wordlen(st);
     if (p[wlen] == 0)
         p[wlen] = newptrarray<intvec*>(wlen);
 
     if (all[wlen] == 0) {
-        all[wlen] = new symbolset[wlen];
+        all[wlen] = new SymbolSet[wlen];
         for (int i=0; i<wlen; i++) all[wlen][i] = 0;
     }
 
@@ -91,9 +86,9 @@ void letterdict::addword(symbol *st, int wordi) {
     } // pointer hell :-)
 }
 
-letterdict::intvec letterdict::emptyvec;
+LetterDict::intvec LetterDict::emptyvec;
 
-letterdict::intvec *letterdict::getintvec(int len, int pos, symbol s) {
+LetterDict::intvec *LetterDict::getintvec(int len, int pos, Symbol s) {
     if (p[len] == 0) return &emptyvec;
     if (p[len][pos] == 0) return &emptyvec;
     int chval = s.symbvalue();
@@ -101,14 +96,14 @@ letterdict::intvec *letterdict::getintvec(int len, int pos, symbol s) {
     return p[len][pos][chval];
 }
 
-symbolset letterdict::findpossible(symbol *s, int len, int pos) {
+SymbolSet LetterDict::findpossible(Symbol *s, int len, int pos) {
     if (len == 1) return wl->allalpha;
 
     intvec *chpset[len];
     int nsets = 0;
 
     for (int i=0;i<len;i++)
-        if (s[i] != symbol::empty)
+        if (s[i] != Symbol::empty)
             chpset[nsets++] = getintvec(len, i, s[i]);
 
     // cout << nsets << " sets\n";
@@ -119,7 +114,7 @@ symbolset letterdict::findpossible(symbol *s, int len, int pos) {
         return all[len][pos];
     }
 
-    symbolset ss = 0;
+    SymbolSet ss = 0;
 
     intvec::iterator it[nsets];
     for (int i=0;i<nsets; i++) {
@@ -166,15 +161,15 @@ symbolset letterdict::findpossible(symbol *s, int len, int pos) {
     return ss;
 }
 
-void letterdict::load(const string &fn) {
-    cout << "Loading wordlist and building dictionary... " << flush;
+void LetterDict::load(const std::string &fn) {
+    std::cout << "Loading wordlist and building dictionary... " << std::flush;
 
-    wl = new wordlist();
+    wl = new WordList();
     wl->load(fn);
 
     int nwords = wl->numwords();
     for (int i=0; i<nwords; i++)
         addword((*wl)[i], i);
 
-    cout << "ok" << endl;
+    std::cout << "ok" << std::endl;
 }

@@ -13,8 +13,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp \
-    crossword.cpp
+    main.cpp \
+    crossword.cpp \
+    cwc/cwc.cc \
+    cwc/dict.cc \
+    cwc/grid.cc \
+    cwc/letterdict.cc \
+    cwc/symbol.cc \
+    cwc/timer.cc \
+    cwc/wordlist.cc
 
 RESOURCES += qml.qrc
 
@@ -30,4 +37,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    crossword.h
+    crossword.h \
+    cwc/cwc.hh \
+    cwc/dict.hh \
+    cwc/grid.hh \
+    cwc/letterdict.hh \
+    cwc/main.hh \
+    cwc/symbol.hh \
+    cwc/timer.hh \
+    cwc/wordlist.hh

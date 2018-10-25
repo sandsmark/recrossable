@@ -24,59 +24,57 @@
 
 #include "main.hh"
 
-using std::ostream;
-
-typedef unsigned long symbolset;
+typedef unsigned long SymbolSet;
 
 #define UNDEF 0x7f
 
-class symbol {
+class Symbol {
     char symb;
-    static symbol alphindex[256];
+    static Symbol alphindex[256];
     static char searchchar(char);
     static int symballoc;
 public:
     static char alphabet[32];
-    static symbol outside, empty, none;
-    static symbol alloc(char ch = UNDEF);
-    static symbol symbolbit(symbolset); // named constructor
+    static Symbol outside, empty, none;
+    static Symbol alloc(char ch = UNDEF);
+    static Symbol symbolbit(SymbolSet); // named constructor
     //  static symbol special();
 
-    symbol() : symb(UNDEF) {}
-    symbol(char ch);
+    Symbol() : symb(UNDEF) {}
+    Symbol(char ch);
 
-    inline symbolset getsymbolset();
+    inline SymbolSet getsymbolset();
     inline operator char();
-    inline bool operator == (symbol const &s) const;
+    inline bool operator == (Symbol const &s) const;
 
     static void buildindex();
     int symbvalue() { return int(symb); }
     static int numalpha();
 };
 
-symbolset symbol::getsymbolset() {
+SymbolSet Symbol::getsymbolset() {
     return 1 << symb;
 }
 
-bool symbol::operator==(symbol const &s) const {
+bool Symbol::operator==(Symbol const &s) const {
     return symb == s.symb;
 }
 
-symbol::operator char() {
+Symbol::operator char() {
     if (symb == UNDEF) throw error("action on undefined symbol");
     return alphabet[(int)symb];
 }
 
-symbolset pickbit(symbolset &ss);
+SymbolSet pickbit(SymbolSet &ss);
 
 //////////////////////////////////////////////////////////////////////
 
-void dumpset(symbolset ss);
-void dumpsymbollist(symbol *s, int n);
-ostream &operator <<(ostream &os, symbol *s);
+void dumpset(SymbolSet ss);
+void dumpsymbollist(Symbol *s, int n);
+std::ostream &operator <<(std::ostream &os, Symbol *s);
 
-int wordlen(symbol *st);
+int wordlen(Symbol *st);
 
-int numones(symbolset ss);
+int numones(SymbolSet ss);
 
 #endif // CWC_SYMBOL_HH

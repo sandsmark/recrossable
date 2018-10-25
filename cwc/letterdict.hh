@@ -28,21 +28,18 @@
 #include "dict.hh"
 #include "wordlist.hh"
 
-using std::vector;
-using std::set;
-
-class letterdict : public dict {
-    typedef vector<int> intvec;
+class LetterDict : public Dict {
+    typedef std::vector<int> intvec;
     intvec ****p;
-    symbolset **all;
-    wordlist *wl;
+    SymbolSet **all;
+    WordList *wl;
     static intvec emptyvec;
 public:
-    letterdict();
-    void addword(symbol *i, int wordi);
-    intvec *getintvec(int len, int pos, symbol s);
-    symbolset findpossible(symbol *, int len, int pos);
-    void load(const string &fn);
+    LetterDict();
+    void addword(Symbol *i, int wordi);
+    intvec *getintvec(int len, int pos, Symbol s);
+    SymbolSet findpossible(Symbol *, int len, int pos);
+    void load(const std::string &fn);
 };
 
 #endif // CWC_LETTERDICT_HH
