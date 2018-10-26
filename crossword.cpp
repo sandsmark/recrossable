@@ -65,7 +65,7 @@ QStringList Crossword::hintsDown()
 {
     QStringList ret;
     for (const int &num : m_answers.down.clues) {
-        QString clue = QString::number(num) + "→: ";
+        QString clue = QString::number(num) + "↓: ";
         clue += m_hints[QString::fromStdString(m_answers.down.cluetoanswer[num])];
         ret.append(clue);
     }

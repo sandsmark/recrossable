@@ -15,6 +15,7 @@ void DrawableCell::paint(QPainter *painter)
 {
     painter->drawImage(boundingRect(), m_drawn);
 
+#if 0
     if (!m_recognized.isEmpty()) {
         QFont font;
         font.setPixelSize(height() / 2);
@@ -22,6 +23,7 @@ void DrawableCell::paint(QPainter *painter)
         painter->fillRect(boundingRect(), QColor(255, 255, 255, 128));
         painter->drawText(boundingRect(), Qt::AlignHCenter | Qt::AlignBottom, m_recognized);
     }
+#endif
 }
 
 void DrawableCell::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -54,6 +56,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
         qWarning() << "Invalid format" << m_drawn.format();
         m_drawn = m_drawn.convertToFormat(QImage::Format_Grayscale8);
     }
+
     int beginY = m_drawn.height();
     int beginX = m_drawn.width();
     int endY = 0;
@@ -70,24 +73,51 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
             }
         }
     }
+
+    beginX++;
+    beginY++;
+    endX--;
+    endY--;
     qDebug() << beginX << beginY << endX << endY;
     if (endX == 0 || endY == 0) {
         qWarning() << "empty";
         return;
     }
+
+    const int width = endX - beginX;
+    const int centerX = beginX + width / 2;
+    const int height = endY - beginY;
+    const int centerY = beginY + height / 2;
+    const int edge = std::max(width, height);
     if (beginX >= endX || beginY >= endY) {
         qWarning() << "invalid";
+        return;
     }
 
-    QImage scaled = m_drawn.copy(QRect(beginY, beginX, endY - beginY, endX - beginX)).scaled(28, 28).convertToFormat(QImage::Format_Grayscale8);
+    QRect cropRect(0, 0, edge, edge);
+    cropRect.moveCenter(QPoint(centerX, centerY));
+    if (cropRect.top() < 0) {
+        cropRect.moveTop(0);
+    }
+    if (cropRect.left() < 0) {
+        cropRect.moveLeft(0);
+    }
+    if (cropRect.right() >= m_drawn.width()) {
+        cropRect.moveRight(m_drawn.width() - 1);
+    }
+    if (cropRect.bottom() >= m_drawn.height()) {
+        cropRect.moveBottom(m_drawn.height() - 1);
+    }
+    QImage scaled = m_drawn.copy(cropRect).scaled(20, 20);
+    scaled.invertPixels();
+    scaled = scaled.copy(-4, -4, 28, 28).convertToFormat(QImage::Format_Grayscale8);
 
-//    QImage scaled = m_drawn.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_Grayscale8);
 
     int black = 0;
     for (int y=0; y<scaled.height(); y++) {
         const uchar *line = scaled.scanLine(y);
         for (int x=0; x<scaled.width(); x++) {
-            if (line[x] < 128) {
+            if (line[x] > 128) {
                 black++;
             }
         }
@@ -95,13 +125,18 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 
     // Check if the user has tried to cover up something wrong
     if (black > (scaled.width() * scaled.height()) / 3) {
+        qDebug() << "Clearing";
         m_drawn.fill(Qt::white);
         m_recognized.clear();
+        emit recognizedChanged();
+        update();
         return;
     }
 
 
-    scaled.invertPixels();
-    m_recognized = CharacterRecognizer::instance()->recognize(scaled);
-    update();
+    QString recognized = CharacterRecognizer::instance()->recognize(scaled);
+    if (recognized != m_recognized) {
+        m_recognized = recognized;
+        emit recognizedChanged();
+    }
 }
