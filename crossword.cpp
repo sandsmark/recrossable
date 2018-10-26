@@ -45,7 +45,7 @@ QString Crossword::correctAt(const int index)
     if (m_grid.cellno(index).isoutside()) {
         return "x";
     }
-    return QString::fromStdString(m_grid.cellno(index).tostring());
+    return QString::fromStdString(m_grid.cellno(index).tostring()).toUpper();
 
 }
 

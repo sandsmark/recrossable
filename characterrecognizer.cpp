@@ -68,7 +68,6 @@ QString CharacterRecognizer::recognize(const QImage &image)
     }
 
     dlib::matrix<unsigned char> dlibImage(28, 28);
-//    dlib::matrix<unsigned char, 28, 28> dlibImage;
     for (int y=0; y<image.height(); y++) {
         const uchar *line = image.scanLine(y);
         for (int x=0; x<image.width(); x++) {
@@ -77,17 +76,8 @@ QString CharacterRecognizer::recognize(const QImage &image)
     }
 
     const unsigned long pred = m_net->net(dlibImage);
-    qDebug() << pred;
-//    std::vector<dlib::matrix<
-//    std::vector<dlib::matrix<unsigned char>> testing_images;
-//    testing_images.push_back(dlibImage);
-//    std::vector<unsigned long> pred = m_net->net(testing_images);
-//    std::vector<long> pred = (*m_net)(dlibImage);
-//    for (const long &f : pred) {
-//        qDebug() << f;
-//    }
 
-    return QString(QChar(ushort(pred + 'a')));
+    return QString(QChar(ushort('A' + pred)));
 }
 
 CharacterRecognizer::CharacterRecognizer(QObject *parent) : QObject(parent)

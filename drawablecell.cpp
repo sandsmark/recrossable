@@ -22,10 +22,9 @@ void DrawableCell::paint(QPainter *painter)
 
     if (!m_recognized.isEmpty()) {
         QFont font;
-        font.setPixelSize(height() / 2);
+        font.setPixelSize(height() / 4);
         painter->setFont(font);
-        painter->fillRect(boundingRect(), QColor(255, 255, 255, 128));
-        painter->drawText(boundingRect(), Qt::AlignHCenter | Qt::AlignBottom, m_recognized);
+        painter->drawText(boundingRect().marginsRemoved(QMarginsF(2, 2, 2, 2)), Qt::AlignRight | Qt::AlignBottom, m_recognized);
     }
 }
 
@@ -59,14 +58,14 @@ void DrawableCell::mouseMoveEvent(QMouseEvent *event)
     m_recognized.clear();
 
     QPainter p(&m_drawn);
-    p.setPen(QPen(Qt::black, 5));
+    p.setPen(QPen(Qt::black, 6));
     p.drawLine(m_lastPoint, event->localPos());
 
 #ifdef REMARKABLE_DEVICE
     {
         QPainter fbPainter(EPFrameBuffer::framebuffer());
         fbPainter.setClipRect(mapRectToScene(boundingRect()));
-        fbPainter.setPen(QPen(Qt::black, 5));
+        fbPainter.setPen(QPen(Qt::black, 6));
         const QPoint globalStart = mapToScene(m_lastPoint).toPoint();
         const QPoint globalEnd = event->globalPos();
         fbPainter.drawLine(globalStart, globalEnd);
@@ -114,7 +113,6 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     beginY++;
     endX--;
     endY--;
-    qDebug() << beginX << beginY << endX << endY;
     if (endX == 0 || endY == 0) {
         qWarning() << "empty";
         return;
@@ -159,7 +157,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // Check if the user has tried to cover up something wrong
-    if (black > (m_drawn.width() * m_drawn.height()) / 3) {
+    if (black > (m_drawn.width() * m_drawn.height()) / 4) {
         qDebug() << "Clearing";
         m_drawn.fill(Qt::white);
         m_recognized.clear();
@@ -170,7 +168,6 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 
 
     QString recognized = CharacterRecognizer::instance()->recognize(scaled);
-    qDebug() << recognized;
     if (recognized != m_recognized) {
         m_recognized = recognized;
         emit recognizedChanged();

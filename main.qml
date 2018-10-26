@@ -27,7 +27,12 @@ TabletWindow {
 
     Grid {
         id: mainGrid
-        anchors.centerIn: parent
+        anchors {
+            right: parent.right
+            rightMargin: 20
+            bottom: parent.bottom
+            bottomMargin: 20
+        }
 
         spacing: 20
         rows: Crossword.rows
@@ -36,8 +41,8 @@ TabletWindow {
         Repeater {
             model: Crossword.rows * Crossword.columns
             delegate: DrawableCell {
-                width: 100
-                height: 100
+                width: 150
+                height: 150
 
                 enabled: !correctText.visible
 
@@ -53,7 +58,6 @@ TabletWindow {
                     text: Crossword.hintAt(index)
                     color: correctText.visible ? "white" : "black"
                 }
-
 
                 Text {
                     id: correctText
