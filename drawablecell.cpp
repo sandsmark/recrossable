@@ -15,7 +15,6 @@ void DrawableCell::paint(QPainter *painter)
 {
     painter->drawImage(boundingRect(), m_drawn);
 
-#if 0
     if (!m_recognized.isEmpty()) {
         QFont font;
         font.setPixelSize(height() / 2);
@@ -23,7 +22,6 @@ void DrawableCell::paint(QPainter *painter)
         painter->fillRect(boundingRect(), QColor(255, 255, 255, 128));
         painter->drawText(boundingRect(), Qt::AlignHCenter | Qt::AlignBottom, m_recognized);
     }
-#endif
 }
 
 void DrawableCell::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)

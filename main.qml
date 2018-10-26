@@ -23,7 +23,7 @@ Window {
         id: mainGrid
         anchors.centerIn: parent
 
-        spacing: 10
+        spacing: 20
         rows: Crossword.rows
         columns: Crossword.columns
 
