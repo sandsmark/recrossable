@@ -39,39 +39,52 @@ void DrawableCell::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void DrawableCell::mousePressEvent(QMouseEvent *event)
 {
+    if (!isEnabled()) {
+        return;
+    }
+
     m_lastPoint = event->localPos();
-    qDebug() << "LOCAL" << m_lastPoint;
 }
 
 void DrawableCell::mouseMoveEvent(QMouseEvent *event)
 {
+    if (!isEnabled()) {
+        return;
+    }
+
+    if (!contains(event->localPos())) {
+        return;
+    }
+
     m_recognized.clear();
 
     QPainter p(&m_drawn);
     p.setPen(QPen(Qt::black, 5));
     p.drawLine(m_lastPoint, event->localPos());
-    m_lastPoint = event->localPos();
 
 #ifdef REMARKABLE_DEVICE
     {
         QPainter fbPainter(EPFrameBuffer::framebuffer());
-        //    fbPainter.drawImage(mapToScene(QPointF(0, 0)), m_drawn);
+        fbPainter.setClipRect(mapRectToScene(boundingRect()));
         fbPainter.setPen(QPen(Qt::black, 5));
         const QPoint globalStart = mapToScene(m_lastPoint).toPoint();
         const QPoint globalEnd = event->globalPos();
         fbPainter.drawLine(globalStart, globalEnd);
         fbPainter.end();
-        qDebug() << "drawing" << globalStart << globalEnd;
         EPFrameBuffer::sendUpdate(QRect(globalStart, globalEnd).normalized().marginsAdded(QMargins(24, 24, 24, 24  )), EPFrameBuffer::Mono, EPFrameBuffer::PartialUpdate);
-//        EPFrameBuffer::sendUpdate(mapRectToScene(m_drawn.rect()).normalized().marginsAdded(QMargins(24, 24, 24, 24)).toAlignedRect(), EPFrameBuffer::Mono, EPFrameBuffer::PartialUpdate);
     }
 #else
     update();
 #endif
+    m_lastPoint = event->localPos();
 }
 
 void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (!isEnabled()) {
+        return;
+    }
+
     Q_UNUSED(event);
     if (m_drawn.format() != QImage::Format_Grayscale8) {
         qWarning() << "Invalid format" << m_drawn.format();
@@ -83,6 +96,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     int endY = 0;
     int endX = 0;
 
+    int black = 0;
     for (int y=0; y<m_drawn.height(); y++) {
         const uchar *line = m_drawn.scanLine(y);
         for (int x=0; x<m_drawn.width(); x++) {
@@ -91,6 +105,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
                 beginX = std::min(x, beginX);
                 endY = std::max(endY, y);
                 endX = std::max(endX, x);
+                black++;
             }
         }
     }
@@ -134,7 +149,6 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     scaled = scaled.copy(-4, -4, 28, 28).convertToFormat(QImage::Format_Grayscale8);
 
 
-    int black = 0;
     for (int y=0; y<scaled.height(); y++) {
         const uchar *line = scaled.scanLine(y);
         for (int x=0; x<scaled.width(); x++) {
@@ -145,7 +159,7 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // Check if the user has tried to cover up something wrong
-    if (black > (scaled.width() * scaled.height()) / 3) {
+    if (black > (m_drawn.width() * m_drawn.height()) / 3) {
         qDebug() << "Clearing";
         m_drawn.fill(Qt::white);
         m_recognized.clear();

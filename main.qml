@@ -36,30 +36,31 @@ TabletWindow {
         Repeater {
             model: Crossword.rows * Crossword.columns
             delegate: DrawableCell {
-                Component.onCompleted: console.log(parent + " " + parent.parent + " " + parent.parent.parent)
-                onParentChanged: console.log(parent + " " + parent.parent + " " + parent.parent.parent)
                 width: 100
                 height: 100
 
-//                enabled: parent.recognized !== Crossword.correctAt(index)
+                enabled: !correctText.visible
+
+                Rectangle {
+                    anchors.fill: parent
+                    border.width: 2
+                    color: correctText.visible ? "black" : "transparent"
+                }
 
                 Text {
                     x: 10
                     y: 10
                     text: Crossword.hintAt(index)
+                    color: correctText.visible ? "white" : "black"
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    border.width: 2
-                    color: correctText.visible ? "white" : "transparent"
-                }
 
                 Text {
                     id: correctText
                     anchors.centerIn: parent
                     visible: parent.recognized === text
                     text: Crossword.correctAt(index)
+                    color: "white"
                 }
             }
         }

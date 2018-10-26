@@ -41,6 +41,7 @@ protected:
         QPointF scenePos(event->globalPosF().y() / height() * width(), (1.0 - event->globalPosF().x() / width()) * height());
         QMouseEvent fakeEvent(fakeType,
                               scenePos,
+                              scenePos,
                               fakeType == QEvent::MouseMove ? Qt::NoButton : Qt::LeftButton,
                               Qt::NoButton,
                               Qt::NoModifier
