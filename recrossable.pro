@@ -53,3 +53,17 @@ HEADERS += \
     cwc/wordlist.hh \
     drawablecell.h \
     characterrecognizer.h
+
+linux-oe-g++ {
+    LIBS += -lqsgepaper
+    DEFINES += REMARKABLE_DEVICE
+
+    # Someone™ removed the dlib and openblas from the device for some reason, but it's still in the toolchain
+    dlibso.files = \
+        $$[QT_INSTALL_PREFIX]/lib/libdlib.so.19.7.99 \
+        $$[QT_INSTALL_PREFIX]/lib/libopenblas.so.0 \
+        $$[QT_INSTALL_PREFIX]/lib/libopenblas_cortexa9p-r0.2.19.so \
+
+    dlibso.path = /usr/lib/
+    INSTALLS += dlibso
+}

@@ -1,12 +1,18 @@
-import QtQuick 2.11
-import QtQuick.Window 2.11
+import QtQuick 2.3
+import QtQuick.Window 2.2
 import com.iskrembilen 1.0
 
-Window {
+TabletWindow {
     visible: true
-    width: 640
-    height: 480
+    width: 1404
+    height: 1872
+
     title: qsTr("Hello World")
+    flags: Qt.Dialog
+
+    Rectangle {
+        anchors.fill: parent
+    }
 
     Text {
         id: currentHint
@@ -30,8 +36,12 @@ Window {
         Repeater {
             model: Crossword.rows * Crossword.columns
             delegate: DrawableCell {
+                Component.onCompleted: console.log(parent + " " + parent.parent + " " + parent.parent.parent)
+                onParentChanged: console.log(parent + " " + parent.parent + " " + parent.parent.parent)
                 width: 100
                 height: 100
+
+//                enabled: parent.recognized !== Crossword.correctAt(index)
 
                 Text {
                     x: 10
@@ -42,7 +52,14 @@ Window {
                 Rectangle {
                     anchors.fill: parent
                     border.width: 2
-                    color: "transparent"
+                    color: correctText.visible ? "white" : "transparent"
+                }
+
+                Text {
+                    id: correctText
+                    anchors.centerIn: parent
+                    visible: parent.recognized === text
+                    text: Crossword.correctAt(index)
                 }
             }
         }
@@ -55,6 +72,10 @@ Window {
             leftMargin: 10
             right: mainGrid.left
             rightMargin: 10
+        }
+
+        Text {
+            text: "Across"
         }
 
         Repeater {
@@ -70,6 +91,10 @@ Window {
             horizontalCenter: parent.horizontalCenter
             top: parent.top
             topMargin: 10
+        }
+
+        Text {
+            text: "Down"
         }
 
         Repeater {

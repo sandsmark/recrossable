@@ -20,14 +20,23 @@ public slots:
 
 protected:
     void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) override;
+
+    // hack around crappy stylus/tablet support in qt 5.6
+#if (QT_VERSION < QT_VERSION_CHECK(5, 7, 0))
+public:
+#endif
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+
 
 private:
     QPointF m_lastPoint;
     QString m_recognized;
     QImage m_drawn;
+
+    // QObject interface
+public:
 };
 
 #endif // DRAWABLECELL_H

@@ -2,6 +2,11 @@
 #include <QImage>
 #include <QPainter>
 #include "characterrecognizer.h"
+#include <QDebug>
+
+#ifdef REMARKABLE_DEVICE
+#include <epframebuffer.h>
+#endif
 
 DrawableCell::DrawableCell()
 {
@@ -35,16 +40,34 @@ void DrawableCell::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 void DrawableCell::mousePressEvent(QMouseEvent *event)
 {
     m_lastPoint = event->localPos();
+    qDebug() << "LOCAL" << m_lastPoint;
 }
 
 void DrawableCell::mouseMoveEvent(QMouseEvent *event)
 {
     m_recognized.clear();
+
     QPainter p(&m_drawn);
     p.setPen(QPen(Qt::black, 5));
     p.drawLine(m_lastPoint, event->localPos());
     m_lastPoint = event->localPos();
+
+#ifdef REMARKABLE_DEVICE
+    {
+        QPainter fbPainter(EPFrameBuffer::framebuffer());
+        //    fbPainter.drawImage(mapToScene(QPointF(0, 0)), m_drawn);
+        fbPainter.setPen(QPen(Qt::black, 5));
+        const QPoint globalStart = mapToScene(m_lastPoint).toPoint();
+        const QPoint globalEnd = event->globalPos();
+        fbPainter.drawLine(globalStart, globalEnd);
+        fbPainter.end();
+        qDebug() << "drawing" << globalStart << globalEnd;
+        EPFrameBuffer::sendUpdate(QRect(globalStart, globalEnd).normalized().marginsAdded(QMargins(24, 24, 24, 24  )), EPFrameBuffer::Mono, EPFrameBuffer::PartialUpdate);
+//        EPFrameBuffer::sendUpdate(mapRectToScene(m_drawn.rect()).normalized().marginsAdded(QMargins(24, 24, 24, 24)).toAlignedRect(), EPFrameBuffer::Mono, EPFrameBuffer::PartialUpdate);
+    }
+#else
     update();
+#endif
 }
 
 void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
