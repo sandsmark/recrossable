@@ -1,9 +1,13 @@
 #include "characterrecognizer.h"
 
-#include <dlib/dnn.h>
-#include <dlib/data_io.h>
 #include <QImage>
 #include <QDebug>
+#include <QFile>
+
+#include <sstream>
+
+#include <dlib/dnn.h>
+#include <dlib/data_io.h>
 
 using dlib::relu;
 using dlib::con;
@@ -89,6 +93,13 @@ QString CharacterRecognizer::recognize(const QImage &image)
 CharacterRecognizer::CharacterRecognizer(QObject *parent) : QObject(parent)
 {
     m_net = new Network;
-    dlib::deserialize("/home/sandsmark/src/recrossable/mnist_network.dat") >> m_net->net;
+    QFile netFile(":/net.dat");
+    if (!netFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Failed to load net file";
+        return;
+    }
+    std::string netData = netFile.readAll().toStdString();
+    std::istringstream istr(netData);
+    dlib::deserialize(m_net->net, istr);
     qDebug() << "Network ready";
 }

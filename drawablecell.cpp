@@ -133,8 +133,10 @@ void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 
 
     QString recognized = CharacterRecognizer::instance()->recognize(scaled);
+    qDebug() << recognized;
     if (recognized != m_recognized) {
         m_recognized = recognized;
         emit recognizedChanged();
+        update();
     }
 }
