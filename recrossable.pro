@@ -28,7 +28,10 @@ SOURCES += \
     characterrecognizer.cpp
 
 LIBS += -ldlib
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    patterns.qrc \
+    wordlists.qrc \
+    data.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

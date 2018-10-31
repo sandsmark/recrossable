@@ -7,15 +7,17 @@
 
 #include <random>
 #include <algorithm>
+#include <sstream>
 
 #include <QDebug>
 #include <QFile>
 #include <QElapsedTimer>
+#include <QDir>
 
 Crossword::Crossword(QObject *parent) : QObject(parent),
     m_rows(5),
     m_columns(4),
-    m_grid(m_columns, m_rows)
+    m_grid(0)
 {
     parseWordlist(":/nyt.tsv");
     generateCrossword();
@@ -42,10 +44,14 @@ QString Crossword::hintAt(const int index)
 
 QString Crossword::correctAt(const int index)
 {
-    if (m_grid.cellno(index).isoutside()) {
+    if (!m_grid) {
+        return {};
+    }
+
+    if (m_grid->cellno(index).isoutside()) {
         return "x";
     }
-    return QString::fromStdString(m_grid.cellno(index).tostring()).toUpper();
+    return QString::fromStdString(m_grid->cellno(index).tostring()).toUpper();
 
 }
 
@@ -132,6 +138,7 @@ void Crossword::parseWordlist(const QString &filePath)
 
 void Crossword::generateCrossword()
 {
+
     LetterDict dict;
 
     dict.wl = new WordList;
@@ -143,16 +150,36 @@ void Crossword::generateCrossword()
     for (int i=0; i<nwords; i++) {
         dict.addword((*dict.wl)[i], i);
     }
-    qDebug() << m_grid.numopen() << "open cells";
-    FloodWalker walker(m_grid);
-    SmartBacktracker backtracker(m_grid);
 
-    Compiler compiler(m_grid, walker, backtracker, dict);
+    if (m_grid) {
+        qWarning() << "========================";
+    }
+    m_grid = new Grid(m_columns, m_rows);
+    QStringList patterns = QDir(":/patterns/").entryList(QDir::Files);
+    if (!patterns.isEmpty()) {
+        QString patternName = patterns[qrand() % patterns.size()];
+        QFile patternFile(":/patterns/" + patternName);
+        std::string pattern;
+        if (patternFile.open(QIODevice::ReadOnly)) {
+            pattern = patternFile.readAll().toStdString();
+        }
+        qDebug().noquote() << QByteArray::fromStdString(pattern);
+        if (!pattern.empty()) {
+            std::istringstream istr(pattern);
+            m_grid->load_template(istr);
+        }
+    }
+
+    qDebug() << m_grid->numopen() << "open cells";
+    FloodWalker walker(*m_grid);
+    SmartBacktracker backtracker(*m_grid);
+
+    Compiler compiler(*m_grid, walker, backtracker, dict);
 //    compiler.verbose = true;
 //    compiler.showsteps = true;
     compiler.compile();
-    m_answers = m_grid.getanswers();
-    m_grid.dump_ascii(std::cout, &m_answers);
+    m_answers = m_grid->getanswers();
+    m_grid->dump_ascii(std::cout, &m_answers);
     m_answers.dump(std::cout);
     qDebug() << "compile completed";
 

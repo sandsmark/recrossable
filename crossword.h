@@ -41,7 +41,7 @@ private:
     int m_rows = 0;
     int m_columns = 0;
 
-    Grid m_grid;
+    Grid *m_grid;
     Answers m_answers;
 };
 

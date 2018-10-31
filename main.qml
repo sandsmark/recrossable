@@ -87,6 +87,7 @@ TabletWindow {
             model: Crossword.hintsAcross()
             delegate: Text {
                 text: modelData
+                font.pointSize: 10
             }
         }
     }
@@ -106,6 +107,7 @@ TabletWindow {
             model: Crossword.hintsDown()
             delegate: Text {
                 text: modelData
+                font.pointSize: 10
             }
         }
     }

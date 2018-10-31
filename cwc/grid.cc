@@ -183,9 +183,7 @@ SymbolSet Cell::findpossible(Dict &d) {
 }
 
 
-void Grid::load_template(const std::string &filename) {
-    std::ifstream tf(filename.c_str());
-    if (!tf.is_open()) throw error("Failed to open pattern file");
+void Grid::load_template(std::istream &tf) {
     std::string istr;
     getline(tf, istr);
     w = h = 1;
@@ -219,13 +217,25 @@ void Grid::load_template(const std::string &filename) {
     lock();
 }
 
+void Grid::load_template(const std::string &filename)
+{
+    std::ifstream tf(filename.c_str());
+    if (!tf.is_open()) throw error("Failed to open pattern file");
+    load_template(tf);
+}
+
 void Grid::load(const std::string &fn) {
-    cls.clear();
-    wbl.clear();
-    w = h = 0;
 
     std::ifstream f(fn.c_str());
     if (!f.is_open()) throw error("Failed to open file");
+    load(f);
+}
+
+void Grid::load(std::istream &f)
+{
+    cls.clear();
+    wbl.clear();
+    w = h = 0;
     std::string ln;
 
     while (!f.eof()) {
@@ -252,6 +262,7 @@ void Grid::load(const std::string &fn) {
             delete wb;
     }
     lock();
+
 }
 
 /**

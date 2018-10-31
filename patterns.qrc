@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>patterns/five</file>
+        <file>patterns/ginsberg</file>
+        <file>patterns/heart</file>
+        <file>patterns/mazlack</file>
+        <file>patterns/pacman</file>
+        <file>patterns/smiley</file>
+        <file>patterns/swirl1</file>
+    </qresource>
+</RCC>

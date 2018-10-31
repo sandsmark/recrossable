@@ -7,6 +7,7 @@
 #include "crossword.h"
 #include "drawablecell.h"
 
+#include <time.h>
 #include "cwc/symbol.hh"
 
 #ifdef REMARKABLE_DEVICE
@@ -67,7 +68,9 @@ typedef TabletWindow QQuickWindow;
 
 int main(int argc, char *argv[])
 {
+    setlocale(LC_CTYPE, "");
     Symbol::buildindex();
+    srand(time(0));
 
 #ifdef REMARKABLE_DEVICE
     qputenv("QMLSCENE_DEVICE", "epaper");
