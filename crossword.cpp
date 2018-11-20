@@ -155,20 +155,20 @@ void Crossword::generateCrossword()
         qWarning() << "========================";
     }
     m_grid = new Grid(m_columns, m_rows);
-    QStringList patterns = QDir(":/patterns/").entryList(QDir::Files);
-    if (!patterns.isEmpty()) {
-        QString patternName = patterns[qrand() % patterns.size()];
-        QFile patternFile(":/patterns/" + patternName);
-        std::string pattern;
-        if (patternFile.open(QIODevice::ReadOnly)) {
-            pattern = patternFile.readAll().toStdString();
-        }
-        qDebug().noquote() << QByteArray::fromStdString(pattern);
-        if (!pattern.empty()) {
-            std::istringstream istr(pattern);
-            m_grid->load_template(istr);
-        }
-    }
+//    QStringList patterns = QDir(":/patterns/").entryList(QDir::Files);
+//    if (!patterns.isEmpty()) {
+//        QString patternName = patterns[qrand() % patterns.size()];
+//        QFile patternFile(":/patterns/" + patternName);
+//        std::string pattern;
+//        if (patternFile.open(QIODevice::ReadOnly)) {
+//            pattern = patternFile.readAll().toStdString();
+//        }
+//        qDebug().noquote() << QByteArray::fromStdString(pattern);
+//        if (!pattern.empty()) {
+//            std::istringstream istr(pattern);
+//            m_grid->load_template(istr);
+//        }
+//    }
 
     qDebug() << m_grid->numopen() << "open cells";
     FloodWalker walker(*m_grid);
