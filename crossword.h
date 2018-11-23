@@ -26,6 +26,7 @@ signals:
 public slots:
     QString hintAt(const int index);
     QString correctAt(const int index);
+    bool isOpen(const int index);
 
     QStringList hintsAcross();
     QStringList hintsDown();
@@ -41,8 +42,8 @@ private:
     int m_rows = 0;
     int m_columns = 0;
 
-    Grid *m_grid;
-    Answers m_answers;
+    Grid *m_grid = nullptr;
+    Answers *m_answers = nullptr;
 };
 
 #endif // CROSSWORD_H

@@ -161,7 +161,6 @@ public:
     Cell &operator()(int p) { return cellno(p); }
 
     void load_template(std::istream &stream);
-    void load_template(const std::string &filename);
     void load(const std::string &fn);
     void load(std::istream &stream);
     void buildwords();

@@ -63,14 +63,14 @@ protected:
     }
 };
 #else
-typedef TabletWindow QQuickWindow;
+typedef QQuickWindow TabletWindow ;
 #endif
 
 int main(int argc, char *argv[])
 {
     setlocale(LC_CTYPE, "");
     Symbol::buildindex();
-    srand(time(0));
+    qsrand(time(0));
 
 #ifdef REMARKABLE_DEVICE
     qputenv("QMLSCENE_DEVICE", "epaper");

@@ -7,7 +7,7 @@ TabletWindow {
     width: 1404
     height: 1872
 
-    title: qsTr("Hello World")
+    title: "reCrossable"
     flags: Qt.Dialog
 
     Rectangle {
@@ -25,38 +25,53 @@ TabletWindow {
         width: parent.width / 3
     }
 
+    Rectangle {
+        anchors.fill: mainGrid
+        anchors.margins: -(border.width  + 2)
+        color: "transparent"
+        border.width: 5
+        border.color: "black"
+    }
+
     Grid {
         id: mainGrid
         anchors {
             right: parent.right
-            rightMargin: 20
+            margins: 20
             bottom: parent.bottom
-            bottomMargin: 20
+            left: acrossHints.right
+            top: downHints.bottom
         }
 
-        spacing: 20
+        spacing: 1
         rows: Crossword.rows
         columns: Crossword.columns
 
+        property int cellSize: Math.max(Math.floor(Math.min(width / Crossword.columns, height / Crossword.rows)), 80);
+
         Repeater {
             model: Crossword.rows * Crossword.columns
-            delegate: DrawableCell {
-                width: 150
-                height: 150
 
-                enabled: !correctText.visible
+            delegate: DrawableCell {
+                width: mainGrid.cellSize
+//                width: 1404 - acrossHints.width
+                height: mainGrid.cellSize
+                onWidthChanged: console.log("cell widtH:" + width)
+
+                enabled: Crossword.isOpen(index) && !correctText.visible
 
                 Rectangle {
                     anchors.fill: parent
-                    border.width: 2
-                    color: correctText.visible ? "black" : "transparent"
+                    border.width: 1
+                    color: parent.enabled ? "transparent" : "black"
                 }
 
                 Text {
-                    x: 10
-                    y: 10
+                    x: 5
+                    y: 5
                     text: Crossword.hintAt(index)
-                    color: correctText.visible ? "white" : "black"
+                    color: parent.enabled ? "gray" : "white"
+                    font.pixelSize: 15
                 }
 
                 Text {
@@ -70,44 +85,68 @@ TabletWindow {
         }
     }
 
+    Rectangle {
+        anchors.fill: acrossHints
+        anchors.margins: -(border.width  + 2)
+        color: "transparent"
+        border.width: 5
+        border.color: "black"
+    }
+
     Column {
+        id: acrossHints
         anchors {
-            verticalCenter: parent.verticalCenter
+            top: downHints.bottom
+            topMargin: 20
             left: parent.left
             leftMargin: 10
-            right: mainGrid.left
-            rightMargin: 10
         }
 
         Text {
             text: "Across"
+            font.bold: true
         }
 
         Repeater {
             model: Crossword.hintsAcross()
             delegate: Text {
                 text: modelData
-                font.pointSize: 10
+                font.pixelSize: 20
+                width: 200
+                wrapMode: Text.WordWrap
             }
         }
     }
 
-    Column {
+
+
+    Rectangle {
+        anchors.fill: downHints
+        anchors.margins: -(border.width  + 2)
+        color: "transparent"
+        border.width: 5
+        border.color: "black"
+    }
+
+    Grid {
+        id: downHints
         anchors {
-            horizontalCenter: parent.horizontalCenter
+            right: parent.right
+            left: parent.left
             top: parent.top
-            topMargin: 10
+            margins: 10
         }
 
         Text {
             text: "Down"
+            font.bold: true
         }
 
         Repeater {
             model: Crossword.hintsDown()
             delegate: Text {
                 text: modelData
-                font.pointSize: 10
+                font.pixelSize: 20
             }
         }
     }

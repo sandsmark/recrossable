@@ -307,12 +307,12 @@ bool Compiler::compile_rest(double rejected) {
     return failure;
 }
 
-void Compiler::compile() {
+bool Compiler::compile() {
     dtimer.reset(); dtimer.start();
     w.forward();
     numcells = g.numopen();
     numalpha = Symbol::numalpha();
-    compile_rest();
+    return compile_rest();
 }
 
 //////////////////////////////////////////////////////////////////////

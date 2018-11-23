@@ -43,7 +43,7 @@ void WordList::load(const std::string &fn) {
 
     std::string line;
     while (!f.eof()) {
-        getline(f, line);
+        std::getline(f, line);
         addWord(line);
     }
 }

@@ -138,7 +138,7 @@ protected:
     bool compile_rest(double rejected = 0);
 public:
     Compiler(Grid &thegrid, Walker &thewalker, Backtracker &thebacktracker, Dict &thedict);
-    void compile();
+    bool compile();
 
     bool verbose, findall, showsteps;
     double getRejected() { return rejected; }

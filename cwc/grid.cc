@@ -185,7 +185,7 @@ SymbolSet Cell::findpossible(Dict &d) {
 
 void Grid::load_template(std::istream &tf) {
     std::string istr;
-    getline(tf, istr);
+    std::getline(tf, istr);
     w = h = 1;
     sscanf(istr.c_str(), "%d %d", &w, &h);
     if ((w==0)||(h==0))
@@ -193,7 +193,7 @@ void Grid::load_template(std::istream &tf) {
     init_grid(w, h);
 
     for (int y=0;y<h;y++) {
-        getline(tf,istr);
+        std::getline(tf,istr);
         if (tf.eof()) throw error("Not enough lines in input file");
         // if (istr.length() < unsigned(w+1)) throw error("Line to short in input file");
         for (int x=0;x<w;x++) {
@@ -203,25 +203,22 @@ void Grid::load_template(std::istream &tf) {
             }
 
             char ch = istr[x];
-            if (ch == '+')
+            if (ch == '+') {
                 cellat(x, y).clear();
-            else if (ch == ' ' )
+            }
+            else if (ch == ' ' ) {
                 cellat(x, y).remove();
-            else if (isalpha(ch))
+            }
+            else if (isalpha(ch)) {
+                std::cout << "character: "  << ch << std::endl;
                 cellat(x, y).setsymbol(tolower(ch));
+            }
             else
                 throw error("Invalid character in input file");
         }
     }
     buildwords();
     lock();
-}
-
-void Grid::load_template(const std::string &filename)
-{
-    std::ifstream tf(filename.c_str());
-    if (!tf.is_open()) throw error("Failed to open pattern file");
-    load_template(tf);
 }
 
 void Grid::load(const std::string &fn) {
@@ -239,7 +236,7 @@ void Grid::load(std::istream &f)
     std::string ln;
 
     while (!f.eof()) {
-        getline(f, ln);
+        std::getline(f, ln);
         const char *st = ln.c_str();
 
         WordBlock *wb = new WordBlock();
