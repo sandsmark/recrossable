@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 #include <QDebug>
+#include <QPainter>
 
 #include "crossword.h"
 #include "drawablecell.h"
@@ -11,6 +12,8 @@
 #include "cwc/symbol.hh"
 
 #ifdef REMARKABLE_DEVICE
+#include <epframebuffer.h>
+
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QsgEpaperPlugin)
 #endif
@@ -82,6 +85,17 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
+
+#ifdef REMARKABLE_DEVICE
+    {
+        EPFrameBuffer::framebuffer()->fill(Qt::white);
+        QPainter painter(EPFrameBuffer::framebuffer());
+        painter.drawText(EPFrameBuffer::framebuffer()->rect(), Qt::AlignCenter, "Generating puzzle...");
+        painter.end();
+        EPFrameBuffer::sendUpdate(EPFrameBuffer::framebuffer()->rect(), EPFrameBuffer::Grayscale, EPFrameBuffer::FullUpdate, true);
+    }
+#endif
+
 
 // hack around crappy stylus/tablet support in qt 5.6
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 7, 0))
