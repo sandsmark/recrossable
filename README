@@ -1,0 +1,6 @@
+Simple crossword game (mainly for the reMarkable tablet, but should work everywhere)
+
+Uses CWC¹ for generating crosswords, and a simple neural net using dlib² for recognising characters.
+
+¹: http://cwordc.sourceforge.net/
+²: http://dlib.net/
