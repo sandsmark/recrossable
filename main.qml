@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.6
 import QtQuick.Window 2.2
 import com.iskrembilen 1.0
 
@@ -13,7 +13,6 @@ TabletWindow {
     Rectangle {
         anchors.fill: parent
     }
-
     Text {
         id: currentHint
         anchors {

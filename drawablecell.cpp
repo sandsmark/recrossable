@@ -38,6 +38,10 @@ void DrawableCell::geometryChanged(const QRectF &newGeometry, const QRectF &oldG
 
 void DrawableCell::mousePressEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt) {
+        return;
+    }
+
     if (!isEnabled()) {
         return;
     }
@@ -47,6 +51,10 @@ void DrawableCell::mousePressEvent(QMouseEvent *event)
 
 void DrawableCell::mouseMoveEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt) {
+        return;
+    }
+
     if (!isEnabled()) {
         return;
     }
@@ -80,6 +88,10 @@ void DrawableCell::mouseMoveEvent(QMouseEvent *event)
 
 void DrawableCell::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->source() == Qt::MouseEventSynthesizedByQt) {
+        return;
+    }
+
     if (!isEnabled()) {
         return;
     }
