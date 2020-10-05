@@ -18,8 +18,7 @@
 Q_IMPORT_PLUGIN(QsgEpaperPlugin)
 #endif
 
-// hack around crappy stylus/tablet support in qt 5.6
-#if (QT_VERSION < QT_VERSION_CHECK(5, 7, 0))
+// hack around crappy stylus/tablet support in qt 5.6^W qt at least up to and including 5.11
 class TabletWindow : public QQuickWindow
 {
 protected:
@@ -65,9 +64,6 @@ protected:
         }
     }
 };
-#else
-typedef QQuickWindow TabletWindow ;
-#endif
 
 int main(int argc, char *argv[])
 {
