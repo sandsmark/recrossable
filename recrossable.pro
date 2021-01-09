@@ -57,7 +57,7 @@ HEADERS += \
     drawablecell.h \
     characterrecognizer.h
 
-linux-oe-g++ {
+linux-arm-gnueabihf-g++ {
     LIBS += -lqsgepaper
     DEFINES += REMARKABLE_DEVICE
 
