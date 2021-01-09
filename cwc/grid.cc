@@ -385,7 +385,7 @@ void Grid::dump(std::ostream &os, Answers * an) {
 
 Answers Grid::getanswers() {
     Answers c;
-    std::unordered_set<int> startcells;
+    std::set<int> startcells;
     /* Index the start cells, and decide which are across and down
        clues: */
     std::vector<WordBlock*>::iterator i;
@@ -424,7 +424,7 @@ Answers Grid::getanswers() {
     }
     /* Number the start cells: */
     int cluenumber=1;
-    std::unordered_set<int>::iterator s;
+    std::set<int>::iterator s;
     for(s=startcells.begin();
         s!=startcells.end();
         ++s) {

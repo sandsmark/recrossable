@@ -38,8 +38,8 @@ TabletWindow {
             right: parent.right
             margins: 20
             bottom: parent.bottom
-            left: acrossHints.right
-            top: downHints.bottom
+            left: downHints.right
+            top: acrossHints.bottom
         }
 
         spacing: 1
@@ -53,7 +53,7 @@ TabletWindow {
 
             delegate: DrawableCell {
                 width: mainGrid.cellSize
-//                width: 1404 - acrossHints.width
+//                width: 1404 - downHints.width
                 height: mainGrid.cellSize
                 onWidthChanged: console.log("cell widtH:" + width)
 
@@ -85,7 +85,7 @@ TabletWindow {
     }
 
     Rectangle {
-        anchors.fill: acrossHints
+        anchors.fill: downHints
         anchors.margins: -(border.width  + 2)
         color: "transparent"
         border.width: 5
@@ -93,21 +93,21 @@ TabletWindow {
     }
 
     Column {
-        id: acrossHints
+        id: downHints
         anchors {
-            top: downHints.bottom
+            top: acrossHints.bottom
             topMargin: 20
             left: parent.left
             leftMargin: 10
         }
 
         Text {
-            text: "Across"
+            text: "Down"
             font.bold: true
         }
 
         Repeater {
-            model: Crossword.hintsAcross()
+            model: Crossword.hintsDown()
             delegate: Text {
                 text: modelData
                 font.pixelSize: 20
@@ -120,7 +120,7 @@ TabletWindow {
 
 
     Rectangle {
-        anchors.fill: downHints
+        anchors.fill: acrossHints
         anchors.margins: -(border.width  + 2)
         color: "transparent"
         border.width: 5
@@ -128,7 +128,7 @@ TabletWindow {
     }
 
     Grid {
-        id: downHints
+        id: acrossHints
         anchors {
             right: parent.right
             left: parent.left
@@ -137,12 +137,12 @@ TabletWindow {
         }
 
         Text {
-            text: "Down"
+            text: "Across"
             font.bold: true
         }
 
         Repeater {
-            model: Crossword.hintsDown()
+            model: Crossword.hintsAcross()
             delegate: Text {
                 text: modelData
                 font.pixelSize: 20
