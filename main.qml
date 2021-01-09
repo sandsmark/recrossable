@@ -71,7 +71,7 @@ TabletWindow {
                     text: Crossword.hintAt(index)
                     color: parent.enabled ? "gray" : "white"
                     font.pixelSize: 20
-                    font.weight: Font.Black
+                    font.bold: true
                 }
 
                 Text {

@@ -22,7 +22,8 @@ void DrawableCell::paint(QPainter *painter)
 
     if (!m_recognized.isEmpty()) {
         QFont font;
-        font.setPixelSize(height() / 4);
+        font.setPixelSize(20); // should match size in main.qml for DrawableCell->text object
+        font.setBold(true); // should match main.qml
         painter->setFont(font);
         painter->drawText(boundingRect().marginsRemoved(QMarginsF(2, 2, 2, 2)), Qt::AlignRight | Qt::AlignBottom, m_recognized);
     }
